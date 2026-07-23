@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>4UPR Contract Platform</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  :root{
+    --accent:#4f46e5; --accent2:#7c3aed; --accent-soft:#eef0ff;
+    --ink:#1b1e2b; --muted:#6b7180; --line:#e5e9f2; --panel:#ffffff;
+  }
+  body { margin: 0; font-family: -apple-system, "PingFang SC", "Microsoft YaHei", Arial, sans-serif;
+    background: linear-gradient(160deg,#eaeefb 0%,#f4f5fa 45%,#f6f4fb 100%); color: var(--ink); min-height: 100vh; }
+  .topbar{ display:flex; align-items:center; gap:14px; padding:15px 26px;
+    background:linear-gradient(100deg,#4f46e5 0%,#6d28d9 55%,#7c3aed 100%); color:#fff;
+    box-shadow:0 6px 22px rgba(79,70,229,.30); position:sticky; top:0; z-index:20; }
+  .brandmark{ font-weight:800; letter-spacing:.5px; font-size:17px; background:rgba(255,255,255,.15);
+    border:1px solid rgba(255,255,255,.4); padding:8px 12px; border-radius:10px; }
+  .apptitle{ font-size:18px; font-weight:700; line-height:1.15; }
+  .appsub{ font-size:11.5px; opacity:.85; margin-top:2px; letter-spacing:.3px; }
+  .wrap { display: flex; gap: 20px; padding: 20px; align-items: flex-start; }
+  .panel { background: var(--panel); border-radius: 14px; box-shadow: 0 8px 26px rgba(30,34,60,.09); border:1px solid #edf0f7; }
+  .form { flex: 0 0 430px; padding: 22px; position: sticky; top: 84px; max-height: calc(100vh - 104px); overflow-y: auto; }
+  .previewWrap { flex: 1; min-width: 0; }
+  h1 { font-size: 18px; margin: 0 0 4px; color: var(--ink); }
+  .sub { font-size: 12px; color: var(--muted); margin: 0 0 16px; }
+  .grp { margin-bottom: 14px; }
+  .form h3 { font-size: 12px; text-transform: uppercase; letter-spacing: .6px; color: var(--accent);
+    margin: 20px 0 9px; padding: 0 0 5px 10px; border-bottom: 1px solid var(--line); border-left: 3px solid var(--accent); }
+  label { display: block; font-size: 12px; font-weight: 600; margin: 8px 0 3px; color: #3a3f4d; }
+  input, select, textarea { width: 100%; padding: 9px 11px; border: 1px solid #d3d9e4; border-radius: 9px; font-size: 13px; font-family: inherit; background:#fcfdff; transition:border-color .15s, box-shadow .15s; }
+  input:focus, select:focus, textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(79,70,229,.15); }
+  textarea { resize: vertical; min-height: 64px; }
+  .row2 { display: flex; gap: 8px; }
+  .row2 > div { flex: 1; }
+  .checks { display: flex; gap: 16px; margin-top: 4px; }
+  .checks label { display: flex; align-items: center; gap: 5px; font-weight: 500; margin: 0; }
+  .checks input { width: auto; }
+  .btns { margin-top: 20px; display: flex; gap: 10px; }
+  button { flex: 1; padding: 11px; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; }
+  .primary { background: linear-gradient(100deg,var(--accent),var(--accent2)); color: #fff; box-shadow: 0 5px 16px rgba(79,70,229,.35); }
+  .primary:hover { filter: brightness(1.06); transform: translateY(-1px); }
+  .ghost { background: #f3f4fb; color: #3a3f4d; border: 1px solid #dde1ec; }
+  .ghost:hover { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
+  .hint { font-size: 11px; color: #888; margin-top: 6px; line-height: 1.4; }
+  .astatus { font-size: 12px; margin: 6px 0 2px; line-height: 1.45; }
+  .astatus.ok { color: #1a7f37; }
+  .astatus.warn { color: #b3541e; }
+  .astatus.busy { color: #4169b8; }
+  .minibtns { display: flex; gap: 8px; margin-top: 8px; }
+  .minibtns button { padding: 8px; font-size: 12px; }
+
+  /* ---- Contract preview (A4) ---- */
+  .previewWrap { display: flex; justify-content: center; }
+  #doc { background: #fff; width: 794px; padding: 54px 62px; font-size: 12px; line-height: 1.5; color: #000; }
+  #doc .title { text-align: center; font-size: 17px; font-weight: bold; margin: 0 0 4px; }
+  #doc .subtitle { text-align: center; font-size: 13px; font-weight: bold; margin: 0 0 14px; }
+  #doc .intro { margin-bottom: 12px; }
+  #doc table.k { width: 100%; border-collapse: collapse; }
+  #doc table.k td { border: 1px solid #999; padding: 6px 9px; vertical-align: top; }
+  #doc table.k td.lbl { width: 165px; font-weight: bold; }
+  #doc .pr p { margin: 2px 0; }
+  #doc .sig { width: 100%; border-collapse: collapse; margin-top: 6px; page-break-inside: avoid; }
+  #doc .sig tr, #doc .sig td { page-break-inside: avoid; }
+  #doc .sig td { width: 50%; border: 1px solid #999; padding: 8px 10px; vertical-align: top; }
+  #doc .sig .sp { height: 20px; }
+  #doc .campaign p { margin: 3px 0; }
+  #doc td.keyhl { background: #fffbe6; }
+  #doc .hl { background: #fff2a8; padding: 1px 3px; font-weight: bold; }
+  #doc .autosign { font-family: 'Dancing Script','Snell Roundhand','Segoe Script','Bradley Hand',cursive; font-size: 30px; line-height: 1; color: #111; }
+  #doc .signline { border-bottom: 1px solid #333; height: 44px; width: 82%; margin: 6px 0 4px; position: relative; }
+  #doc .signline .hint { position: absolute; bottom: 2px; left: 2px; font-size: 9px; color: #aaa; }
+  #doc .signline .autosign { position: absolute; bottom: 3px; left: 6px; }
+  #doc .note { font-style: italic; font-size: 10.5px; border-top: 1px solid #999; margin-top: 16px; padding-top: 8px; color: #222; }
+  #doc b { font-weight: bold; }
+  @media (max-width: 1180px){ .wrap{flex-direction:column;} .form{position:static;flex:1 1 auto;width:100%;} }
+
+  /* Print / Save-as-PDF: show only the contract, keep highlight colours */
+  @media print {
+    /* margin:0 leaves the browser no room to draw its date/URL header & footer -> they disappear.
+       The page's own margins are recreated as padding inside #doc below. */
+    @page { size: A4; margin: 0; }
+    html, body { background: #fff !important; margin: 0 !important; }
+    .topbar, .form, .btns, .minibtns, .hint { display: none !important; }
+    .wrap { display: block !important; padding: 0 !important; gap: 0 !important; }
+    .previewWrap { display: block !important; padding: 0 !important; }
+    .panel { box-shadow: none !important; border: none !important; border-radius: 0 !important; }
+    #doc { width: 100% !important; padding: 14mm 15mm !important; }
+    #doc, #doc * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+  }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="brandmark">4UPR</div>
+  <div>
+    <div class="apptitle">4UPR Contract Platform</div>
+    <div class="appsub">Influencer Collaboration Agreement Generator</div>
+  </div>
+</header>
+<div class="wrap">
+  <!-- FORM -->
+  <div class="panel form">
+    <h1>合同信息</h1>
+    <p class="sub">填写变量信息，右侧实时预览，点"下载 PDF"发给网红。公司信息与标准条款已内置。</p>
+
+    <h3>品牌</h3>
+    <label>合作品牌</label>
+    <select id="brand">
+      <option value="Blacklyte">Blacklyte</option>
+      <option value="MollyJeweryUS">MollyJeweryUS</option>
+    </select>
+    <div id="mollyOpts" style="display:none">
+      <label>样品处理（仅 MollyJeweryUS）</label>
+      <select id="sampleMode">
+        <option value="return">借用，拍摄后退回（退回运费由品牌承担）</option>
+        <option value="gift">赠送，网红自留</option>
+      </select>
+    </div>
+
+    <h3>网红信息</h3>
+    <label>网红 ID / 昵称 (handle)</label>
+    <input id="handle" placeholder="例如 vikketech">
+    <label>全名</label>
+    <input id="fullname" placeholder="例如 Viktor Kuznecki">
+
+    <label>整段粘贴地址（粘贴后自动识别到下方字段）</label>
+    <textarea id="addrPaste" placeholder="把网红发来的整段地址直接粘进来，例如：&#10;Name: Viktor Kuznecki&#10;Address: Leemkuilen 8&#10;City: Kaatsheuvel&#10;State: Noord Brabant&#10;Zip Code: 5171 WV&#10;Country: Netherlands&#10;Phone: +31 6 84 17 09 28"></textarea>
+    <div class="minibtns">
+      <button type="button" class="ghost" onclick="parsePaste()">自动识别</button>
+      <button type="button" class="ghost" onclick="verifyAddr()">校验地址</button>
+    </div>
+    <div id="addrStatus" class="astatus"></div>
+
+    <label>地址（街道/门牌）</label>
+    <input id="addr" placeholder="例如 Leemkuilen 8">
+    <div class="row2">
+      <div><label>城市</label><input id="city"></div>
+      <div><label>省/州/地区</label><input id="state"></div>
+    </div>
+    <div class="row2">
+      <div><label>国家</label><input id="country"></div>
+      <div><label>邮编</label><input id="zip"></div>
+    </div>
+    <label>电话</label>
+    <input id="phone" placeholder="+31 6 84 17 09 28">
+
+    <h3>平台链接</h3>
+    <div class="checks">
+      <label><input type="checkbox" id="useTT" checked> TikTok</label>
+      <label><input type="checkbox" id="useIG" checked> Instagram</label>
+      <label><input type="checkbox" id="useYT"> YouTube</label>
+    </div>
+    <label>TikTok 链接</label>
+    <input id="ttLink" placeholder="https://www.tiktok.com/@vikketech">
+    <label>Instagram 链接</label>
+    <input id="igLink" placeholder="https://www.instagram.com/vikketech/">
+    <label>YouTube 链接</label>
+    <input id="ytLink" placeholder="https://www.youtube.com/@vikketech">
+
+    <h3>合作与费用</h3>
+    <label>合作内容 / Campaign（按平台自动生成，可自行修改或整段粘贴）</label>
+    <textarea id="campaign"></textarea>
+    <div class="minibtns"><button type="button" class="ghost" onclick="maybeSyncCampaign(true);render()">按平台重新生成</button></div>
+    <label>合作费用 (USD)</label>
+    <input id="fee" type="number" placeholder="100">
+    <label>付款条款（选预设，可再编辑）</label>
+    <select id="payPreset">
+      <option value="5">交付全部合作内容后 7 个工作日内付清（标准）</option>
+      <option value="1">上线后一次性付清（4UPR 承担手续费）</option>
+      <option value="2">验收后付 50% + 完成 7 个工作日内付 50%</option>
+      <option value="3">收货预付 50% + 验收后付 50%</option>
+      <option value="4">发布且 bio 挂满 7 天后 3 个工作日内付清</option>
+      <option value="0">自定义 / 不加付款排期</option>
+    </select>
+    <textarea id="paySchedule" placeholder="付款排期英文说明"></textarea>
+
+    <h3>签署</h3>
+    <label>推广人员姓名（广告主签署人）</label>
+    <input id="advSigner" placeholder="例如 Bella">
+    <label>广告主联系邮箱</label>
+    <input id="advEmail" value="bella@4upr.org">
+    <label>推广人员职位</label>
+    <input id="advTitle" value="Marketing Manager">
+    <label>签署日期</label>
+    <input id="date" type="date">
+
+    <div class="btns">
+      <button class="primary" onclick="window.print()">下载 PDF</button>
+    </div>
+    <p class="hint">点"下载 PDF"→ 弹出窗口把"目标 / 打印机"选为"另存为 PDF"→ 保存。已自动去掉网址和日期页眉页脚，分页为可选中的矢量文字。</p>
+  </div>
+
+  <!-- PREVIEW -->
+  <div class="previewWrap panel" style="padding:20px;">
+    <div id="doc"></div>
+  </div>
+</div>
+
+<script>
+const ADV = {
+  name: "4UPR COMPANY limited",
+  email: "info@4upr.org",
+  phone: "2054470684",
+  addr: "3421 SW ROXBURY ST APT 407 SEATTLE WA 98126"
+};
+const PAY_PRESETS = {
+  "1": "Payment schedule: The full fee shall be paid in one lump sum after the video goes live. All payment/transaction fees shall be borne by 4UPR.",
+  "2": "Payment schedule: 50% of the fee shall be paid after the video is approved by the brand; the remaining 50% shall be paid within 7 business days after completion of the collaboration. All payment/transaction fees shall be borne by 4UPR.",
+  "3": "Payment schedule: 50% prepaid upon the talent receiving the product; the remaining 50% paid upon the brand's approval of the video. Both payments are inclusive of all transaction/handling fees (borne by 4UPR).",
+  "4": "Full payment shall be finished within 3 business days after the video is published and the bio link has completed its 7-day placement.",
+  "5": "Full payment shall be made within 7 business days after the talent has delivered all agreed deliverables of the collaboration.",
+  "0": ""
+};
+
+// Pull duration (seconds) and authorization/usage period (months) out of the Campaign text,
+// so clauses follow whatever the promoter actually wrote. Falls back to the template default.
+function deriveFromCampaign(text, brand){
+  const d = { dur: "45", months: "6" };
+  const t = text || "";
+  const dm = t.match(/(\d{1,3})\s*\+?\s*(?:seconds|second|secs|sec)\b/i) || t.match(/(\d{1,3})\s*\+?\s*s\b/i);
+  if(dm) d.dur = dm[1];
+  const mm = t.match(/(\d{1,2})\s*\)?\s*[-–\s]*month/i);
+  if(mm) d.months = mm[1];
+  else if(/\btwelve\b/i.test(t)) d.months = "12";
+  return d;
+}
+
+function buildPromo(brand, der){
+  const isMolly = brand === "MollyJeweryUS";
+  const dur = der.dur, months = der.months;
+  // MollyJewery caps revisions ("no more than 2"); Blacklyte keeps its standard wording.
+  const revision = isMolly
+    ? "The talent agrees to film in accordance with the agreed script; the brand may request revisions or a re-shoot only if the video does not follow the agreed script <b>(no more than two (2) rounds of revisions)</b>."
+    : "The talent agrees to accept at least two rounds of reasonable revisions requested by the brand.";
+  const items = [];
+  items.push(`Video Duration: at least ${dur} s, Usage right for ${months} months`);
+  items.push(`Video Delivery time: The timeline shall be mutually agreed upon by both parties. The talent shall collaborate with the advertiser to discuss and submit the script within 14 business days of receiving the product. Filming may only commence once the script is approved by the brand. A draft video must be submitted within 7 business days after script approved. The video may only be published once approved by the brand. ${revision}`);
+  items.push(`Post time: agreed upon by both parties`);
+  items.push(`The talent needs to display the brand logo, selling points, using feeling, and other requirements provided by Advertiser then call to action. (The advertiser will tell what the video needs to be shot, and the talent will self-edit the rest)`);
+  items.push(`The talent should provide the unlisted link to Advertiser before posting.`);
+  items.push(`The talent needs to provide AD ID (spark code) after the video post (${months} months).`);
+  if(!isMolly){
+    items.push(`${esc(brand)} brand's link in the bio for 7 days, posting through the brand campaign's link if the brand needs.`);
+  }
+  items.push(`There should be no negative content in the promotion video(s)/post(s). After signing the contract with the brand, talent should not publish any brand-related behaviors or statements that are detrimental to the brand, once published, the talent will be held legally responsible and financially liable for any damage caused. Objective and truthful product reviews or good-faith opinions shall not constitute a breach of this clause; only proven malicious or false disparagement shall trigger liability.`);
+  items.push(`The brand has the right to unilaterally cancel the cooperation and not pay the cooperation fee if:<br><span style="margin-left:18px">* The video is released beyond the time specified by the brand</span><br><span style="margin-left:18px">* Talent has bad events, such as negative news, crime, etc., which affect the brand image</span><br><span style="margin-left:18px">* Not cooperating to produce the video as required</span>`);
+  items.push(`Unilateral Cancellation of Contracts<br><span style="margin-left:18px">Ensure the legitimate rights and interests of both parties. Unauthorized cancellation (including loss of contact) by any of the parties to the contract at the following points of cooperation requires compensation for losses to the other party.</span><br><span style="margin-left:18px">1. Received the product, but not yet shot: 50% of the contract amount.</span><br><span style="margin-left:18px">2. Draft video has been shot: 80% of the contract amount.</span><br><span style="margin-left:18px">In the event of any conflict between clause 9 and clause 10, this clause 10 shall prevail.</span>`);
+  return items.map((t,i)=>`<p>${i+1}.&nbsp; ${t}</p>`).join("");
+}
+
+function buildApprovals(brand){
+  const isMolly = brand === "MollyJeweryUS";
+  const revise = isMolly
+    ? "The right to ask the talent to revise the rough cut of video(s) up to two (2) times within Three (3) business days (otherwise such rough cut shall be deemed approved)."
+    : "The right to ask the talent to revise the rough cut of video(s) once within Three (3) business days (otherwise such rough cut shall be deemed approved).";
+  let html = `
+<p>Advertiser shall have:</p>
+<p>. The right to approve the creative shooting ideas of the video;</p>
+<p>. ${revise}</p>
+<p>. If the video content does not show the brand's selling point at all and does not meet the brand's filming requirements, the brand has the right to ask the talent to re-shoot the video.</p>
+<p>. If the collaboration is not completed and the video is not released on time because of influencer, the brand has the right not to pay any fees.</p>`;
+  if(isMolly) html += `<p>${esc(MOLLY_CLAUSE)}</p>`;
+  return html;
+}
+
+function buildAdditional(brand, der){
+  if(brand === "MollyJeweryUS"){
+    const months = der.months;
+    return `
+<p>Talent owns content, but is creating it for the brand, lending their name &amp; likeness. The Creator grants the Brand a ${months}-month authorization to use the Creator's Partnership Ads code for paid media amplification, and the Brand shall have full usage rights to all delivered assets across paid advertising, social media reposting, website, and organic marketing channels.</p>
+<p>All sponsored content will include the required disclosures, tags, and platform labels in accordance with applicable platform guidelines.</p>
+<p>Once the content is live, brand reserves the rights of using the content (post/video) produced by the partner on a global, non-exclusive basis for a period of ${months} months. The Partner undertakes not to infringe the rights of any third party in the content produced, otherwise shall bear all losses caused to the brand as a result.</p>`;
+  }
+  return `
+<p>Talent owns content, but is creating it for the brand, lending their name &amp; likeness, but brand may only use on owned brand channels like social media, conversion ads etc.</p>
+<p>Once the review is live, brand reserves the rights of using the content of the review (post/video) produced by the partner on a global, non-exclusive basis for a period of 6 months. The Partner undertakes not to infringe the rights of any third party in the content produced, otherwise shall bear all losses caused to the brand as a result.</p>`;
+}
+
+const NOTE = `*Note: We are a third-party media agency and cooperate with the Blacklyte brand. The talent signed a contract with our company "4UPR COMPANY limited" instead of the Blacklyte brand. All cooperation details should be communicated with "4UPR COMPANY limited". Please do not cross our company and contact Blacklyte official brand directly, otherwise it is a breach of contract.`;
+
+function esc(s){ return (s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+function fmtDate(v){
+  if(!v) return "__________";
+  const [y,m,d] = v.split("-").map(Number);
+  const M = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+  return `${M[m-1]} ${d}, ${y}`;
+}
+
+function val(id){ return document.getElementById(id).value.trim(); }
+
+function defaultCampaign(){
+  const brand = val("brand") || "Blacklyte";
+  const plats = [];
+  if(document.getElementById("useTT").checked) plats.push("TikTok");
+  if(document.getElementById("useIG").checked) plats.push("Instagram");
+  if(document.getElementById("useYT").checked) plats.push("YouTube");
+  const main = plats[0] || "the agreed platform";
+  const others = plats.slice(1);
+  let s = `Promotion of ${brand} (1 Dedicated Video (at least 45s) on ${main}`;
+  if(others.length) s += `, reposted to ${others.join(" & ")}`;
+  s += ` + Link in bio for 7 days + Usage right for 6 months)`;
+  return s;
+}
+let lastAutoCampaign = "";
+function maybeSyncCampaign(force){
+  const el = document.getElementById("campaign");
+  const def = defaultCampaign();
+  if(force || !el.value.trim() || el.value.trim() === lastAutoCampaign){
+    el.value = def; lastAutoCampaign = def;
+  }
+}
+
+const MOLLY_CLAUSE = ". The script shall be jointly agreed upon by the talent and the brand. If the video is not filmed in accordance with the agreed script, the brand has the right to request a re-shoot or revisions (the number of revisions shall not exceed two). If the talent publishes any video without the brand's prior approval, it shall constitute a breach of this Agreement, and the brand shall have the right to cancel the collaboration and require the return of the product.";
+const NODELETE = "Once published, the video(s)/post(s) shall remain publicly available permanently and must not be hidden, set to private, unlisted, or deleted at any time. Any such action shall be deemed a material breach of this Agreement.";
+const LIQDAM = "The compensation percentages and amounts set out in this Agreement represent a genuine pre-estimate of the losses that would be suffered and are agreed as liquidated damages, not as a penalty. Save for such liquidated damages and for any liability that cannot be limited or excluded under applicable law, neither party's total aggregate liability under this Agreement shall exceed the total fee payable hereunder.";
+const CONFID = "Both parties shall keep confidential the terms of this Agreement (including the fee) and any non-public information disclosed in connection with the collaboration, and shall not disclose the same to any third party without prior written consent, except as required by law or by applicable platform disclosure/labeling rules.";
+const ESIGN = "This Agreement may be executed electronically and in one or more counterparts, each of which shall be deemed an original and all of which together shall constitute one and the same agreement.";
+const PAYFEES = "4UPR shall bear all transaction/transfer fees incurred in making the payment.";
+function agencyClause(brand){
+  return `4UPR COMPANY limited enters into this Agreement as the authorized agent of, and on behalf of, the ${brand}. The ${brand} is an intended third-party beneficiary of this Agreement and may directly enforce the rights and licenses granted to it hereunder.`;
+}
+const MOLLY_SAMPLE = {
+  "return": "Product sample: the product sample provided for this collaboration is provided on loan and must be returned after filming. Both the outbound shipping cost (sending the sample to the talent) and the return shipping cost (returning the sample) shall be borne by 4UPR.",
+  "gift": "Product sample: the product sample provided for this collaboration is provided as a gift and may be kept by the talent. The outbound shipping cost shall be borne by 4UPR."
+};
+
+function render(){
+  maybeSyncCampaign(false);
+  const brand = val("brand") || "Blacklyte";
+  const handle = val("handle") || "________";
+  const fee = val("fee") || "___";
+  const date = fmtDate(val("date"));
+  const useTT = document.getElementById("useTT").checked;
+  const useIG = document.getElementById("useIG").checked;
+  const useYT = document.getElementById("useYT").checked;
+  const tt = val("ttLink"), ig = val("igLink"), yt = val("ytLink");
+
+  const campaignRaw = val("campaign") || defaultCampaign();
+  // split into items by line breaks or — / – dashes, then number them for clarity
+  const campSegs = campaignRaw.split(/\r?\n+|\s*[—–]\s*/).map(s=>s.trim()).filter(Boolean);
+  const campaign = campSegs.length > 1
+      ? campSegs.map((t,i)=>`<p>${i+1}. ${esc(t)}</p>`).join("")
+      : `<p>${esc(campaignRaw)}</p>`;
+
+  // deliverable links
+  let links = "";
+  if(useIG && ig) links += `<p>${esc(ig)}</p>`;
+  if(useTT && tt) links += `<p>${esc(tt)}</p>`;
+  if(useYT && yt) links += `<p>${esc(yt)}</p>`;
+  if(!links) links = "<p>__________</p>";
+
+  // brand-substituted blocks
+  const isMolly = brand === "MollyJeweryUS";
+  const der = deriveFromCampaign(campaignRaw, brand);   // duration & months follow the Campaign text
+  const promoHtml = buildPromo(brand, der);
+  const noteHtml = esc(NOTE.replace(/Blacklyte/g, brand));
+  const approvalsHtml = buildApprovals(brand);
+
+  // show/hide Molly-only options
+  document.getElementById("mollyOpts").style.display = isMolly ? "block" : "none";
+
+  // Additional section: base/Molly usage rights + no-delete + sample (Molly) + formal legal clauses
+  let additionalHtml = buildAdditional(brand, der) + `<p>${esc(NODELETE)}</p>`;
+  let sampleBanner = "";
+  if(isMolly){
+    const mode = document.getElementById("sampleMode").value;
+    additionalHtml += `<p>${esc(MOLLY_SAMPLE[mode])}</p>`;
+    sampleBanner = mode === "gift"
+      ? `<p class="hl">Product sample: this sample is a GIFT — the talent does NOT need to return it after the collaboration.</p>`
+      : `<p class="hl">Product sample: this sample must be RETURNED after the collaboration; both the outbound and return shipping costs are borne by 4UPR.</p>`;
+  }
+  additionalHtml += `<p>${esc(agencyClause(brand))}</p>`;
+  additionalHtml += `<p>${esc(LIQDAM)}</p>`;
+  additionalHtml += `<p>${esc(CONFID)}</p>`;
+
+  // affiliate line only for Blacklyte
+  const affiliateLine = isMolly ? "" : "<p>10% of affiliate commissions are paid through affiliates.</p>";
+
+  // payment
+  const sched = val("paySchedule");
+  const schedLine = sched ? `<p>${esc(sched)}</p>` : "";
+  const feesLine = /4upr/i.test(sched) ? "" : `<p>${esc(PAYFEES)}</p>`;  // avoid dup if preset already mentions 4UPR
+
+  const talentContact = `
+    <p><b>Full name: </b>${esc(val("fullname"))||"__________"}</p>
+    <p><b>Address (apt, house, street): </b>${esc(val("addr"))}</p>
+    <p><b>City: </b>${esc(val("city"))}</p>
+    <p><b>State: </b>${esc(val("state"))}</p>
+    <p><b>Country: </b>${esc(val("country"))}</p>
+    <p><b>Postal code or ZIP code (P.O. Box): </b>${esc(val("zip"))}</p>
+    <p><b>Phone number: </b>${esc(val("phone"))}</p>`;
+
+  const advSigner = esc(val("advSigner")) || "__________";
+  const advTitle = esc(val("advTitle")) || "Marketing Manager";
+  const talentSigner = esc(val("fullname")) || "__________";
+
+  document.getElementById("doc").innerHTML = `
+    <p class="title">${esc(brand)} &amp; ${esc(handle)}</p>
+    <p class="subtitle">ONLINE PRODUCTION AND PROMOTIONAL SERVICES AGREEMENT</p>
+    <p class="intro">This Online Production and Promotional Services Agreement (the "Agreement"), effective as of <b>${date}</b> (the "Effective Date") constitutes the entire agreement between <b>4UPR COMPANY limited</b> ("Advertiser") and <b>${esc(handle)}</b> ("Talent").</p>
+    <table class="k">
+      <tr><td class="lbl">1. Talent:</td><td>${esc(handle)}</td></tr>
+      <tr><td class="lbl">2. Campaign:</td><td class="campaign keyhl">${campaign}${sampleBanner}</td></tr>
+      <tr><td class="lbl">3. Talent Contact:</td><td>${talentContact}</td></tr>
+      <tr><td class="lbl">4. Advertiser Contact:</td><td>
+        <p><b>Name: </b>${ADV.name}</p><p><b>E-mail: </b>${esc(val("advEmail") || ADV.email)}</p>
+        <p><b>Phone number: </b>${ADV.phone}</p><p><b>Address: </b>${ADV.addr}</p></td></tr>
+      <tr><td class="lbl">5. Deliverables:</td><td class="pr">
+        <p>Talent shall deliver one permanent video on</p>${links}
+        <p style="margin-top:8px"><b>Promotional Requirement(s):</b></p>${promoHtml}</td></tr>
+      <tr><td class="lbl">6. Payment:</td><td class="pr">
+        <p><span class="hl">The fee for this collaboration is $${esc(fee)}.</span></p>
+        <p>Payment Method: PayPal OR Bank Transfer.</p>
+        ${schedLine}
+        ${feesLine}
+        ${affiliateLine}</td></tr>
+      <tr><td class="lbl">7. Approvals:</td><td class="pr">${approvalsHtml}</td></tr>
+      <tr><td class="lbl">8. Additional Contract edits/add ons:</td><td class="pr">${additionalHtml}</td></tr>
+    </table>
+    <p style="margin-top:12px">In witness whereof, the parties hereto have executed this Agreement as of the Effective Date: <b>${date}</b></p>
+    <table class="sig">
+      <tr>
+        <td>
+          <b>TALENT:</b><br><b>${esc(handle)}</b>
+          <div class="sp"></div>
+          By (sign):
+          <div class="signline"><span class="hint">Signature</span></div>
+          Print name: ${talentSigner}<br>
+          Its: Talent<br>
+          Date: ____________________
+        </td>
+        <td>
+          <b>ADVERTISER:</b><br><b>4UPR COMPANY limited</b>
+          <div class="sp"></div>
+          By (sign):
+          <div class="signline"><span class="autosign">${advSigner}</span></div>
+          Print name: ${advSigner}<br>
+          Its: ${advTitle}<br>
+          Date: ${date}
+        </td>
+      </tr>
+    </table>
+    <p style="font-size:10.5px; margin-top:8px">${esc(ESIGN)}</p>
+    <p class="note">${noteHtml}</p>`;
+}
+
+// ---- Address paste parsing ----
+function setF(id,v){ if(v){ document.getElementById(id).value = v.replace(/\s+$/,'').trim(); } }
+
+// matches "Label:" anywhere in a line (longer variants listed first)
+const labelReG = /(e-?mail|full\s*name|first\s*name|last\s*name|pr[ée]nom|nom|name|address|adresse|street|city|ville|town|state|province|region|country|pays|zip\s*code|postal\s*code|post\s*code|zip|postal|phone\s*number|phone|mobile|tel(?:ephone)?)\s*[:：]/gi;
+function mapLabel(l){
+  l = (l||"").toLowerCase().replace(/\s+/g," ").trim();
+  if(/e-?mail/.test(l)) return "email";           // talent email — not used in contract
+  if(/name|nom|pr[ée]nom/.test(l)) return "fullname";
+  if(/address|adresse|street/.test(l)) return "addr";
+  if(/city|ville|town/.test(l)) return "city";
+  if(/state|province|region/.test(l)) return "state";
+  if(/country|pays/.test(l)) return "country";
+  if(/zip|postal|post/.test(l)) return "zip";
+  if(/phone|mobile|tel/.test(l)) return "phone";
+  return "";
+}
+function parseAddress(raw){
+  const out = {fullname:'',addr:'',city:'',state:'',country:'',zip:'',phone:''};
+  const labelMap = [
+    [/^(full\s*name|name|nom|pr[ée]nom|姓名)\b/i,'fullname'],
+    [/^(address|addr|street|adresse|adres|地址)\b/i,'addr'],
+    [/^(city|town|ville|stad|城市)\b/i,'city'],
+    [/^(state|province|region|状态|州|省|地区)\b/i,'state'],
+    [/^(zip|postal|post\s*code|zip\s*code|postal\s*code|邮编|邮政编码)\b/i,'zip'],
+    [/^(country|pays|land|国家)\b/i,'country'],
+    [/^(phone|tel|telephone|mobile|电话|手机)\b/i,'phone'],
+  ];
+  let lines = raw.split(/\n/).map(l=>l.trim()).filter(Boolean);
+  const unlabeled = [];
+  for(let line of lines){
+    line = line.replace(/^\s*\d+\s*[\.\)]\s*/,'');            // strip "1." "2)"
+    // case: multiple "Label: value" pairs packed into one line
+    const inline = [...line.matchAll(labelReG)];
+    if(inline.length >= 2){
+      for(let i=0;i<inline.length;i++){
+        const key = mapLabel(inline[i][1]);
+        const s = inline[i].index + inline[i][0].length;
+        const e = (i+1<inline.length) ? inline[i+1].index : line.length;
+        const v = line.slice(s,e).trim().replace(/[;,]+$/,'').trim();
+        if(key && v && !out[key]) out[key] = v;
+      }
+      continue;
+    }
+    let matched = false;
+    for(const [re,key] of labelMap){
+      if(re.test(line)){
+        let v = line.split(/[:：]/).slice(1).join(':').trim();  // text after colon
+        if(!v) v = line.replace(re,'').replace(/^[:：\-\s\/]+/,'').trim();
+        if(v) out[key] = v;
+        matched = true; break;
+      }
+    }
+    if(!matched) unlabeled.push(line);
+  }
+  // heuristics for unlabeled lines
+  const countries = ['united kingdom','uk','united states','usa','us','france','netherlands','the netherlands','germany','spain','italy','canada','australia','belgium','ireland','portugal','poland','sweden','switzerland','austria','denmark','norway','finland','china','中国'];
+  // phone
+  for(let i=unlabeled.length-1;i>=0;i--){
+    if(/^\+?[\d][\d\s().\-]{6,}$/.test(unlabeled[i])){ if(!out.phone) out.phone=unlabeled[i]; unlabeled.splice(i,1); }
+  }
+  // country
+  for(let i=unlabeled.length-1;i>=0;i--){
+    if(countries.includes(unlabeled[i].toLowerCase())){ if(!out.country) out.country=unlabeled[i]; unlabeled.splice(i,1); }
+  }
+  // postal-ish (short, has a digit, letters/digits/space/dash only)
+  for(let i=unlabeled.length-1;i>=0;i--){
+    const l = unlabeled[i];
+    if(!out.zip && /\d/.test(l) && l.length<=10 && /^[A-Za-z0-9 \-]+$/.test(l) && !/\s\S+\s/.test(l)){
+      out.zip = l; unlabeled.splice(i,1);
+    }
+  }
+  // remaining assigned in order
+  const order = ['fullname','addr','city','state'];
+  let oi = 0;
+  for(const l of unlabeled){
+    while(oi<order.length && out[order[oi]]) oi++;
+    if(oi<order.length){ out[order[oi]] = l; oi++; }
+  }
+  return out;
+}
+function parsePaste(){
+  const raw = document.getElementById("addrPaste").value;
+  if(!raw.trim()) return;
+  const p = parseAddress(raw);
+  setF("fullname",p.fullname); setF("addr",p.addr); setF("city",p.city);
+  setF("state",p.state); setF("country",p.country); setF("zip",p.zip); setF("phone",p.phone);
+  const s = document.getElementById("addrStatus");
+  s.className = "astatus ok";
+  s.textContent = "✓ 已识别，请核对下方字段是否正确";
+  render();
+}
+function fullAddrString(){
+  return [val("addr"),val("city"),val("state"),val("zip"),val("country")].filter(Boolean).join(", ");
+}
+function openMaps(){
+  const q = fullAddrString();
+  if(!q){ return; }
+  window.open("https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(q),"_blank");
+}
+async function verifyAddr(){
+  const q = fullAddrString();
+  const s = document.getElementById("addrStatus");
+  if(!q){ s.className="astatus warn"; s.textContent="请先填入地址"; return; }
+  s.className="astatus busy"; s.textContent="校验中…（通过 OpenStreetMap）";
+  try{
+    const r = await fetch("https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&limit=1&q="+encodeURIComponent(q));
+    const j = await r.json();
+    if(j && j.length){
+      s.className="astatus ok";
+      s.innerHTML = "✓ 地址可在地图上定位：<br>"+esc(j[0].display_name)+
+        ' &nbsp;<a href="https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(q)+'" target="_blank">在谷歌地图查看</a>';
+    } else {
+      s.className="astatus warn";
+      s.innerHTML = "⚠ 未能在地图上找到该地址，请仔细核对，或点"+
+        '<a href="https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(q)+'" target="_blank">谷歌地图</a>人工确认。';
+    }
+  }catch(e){
+    s.className="astatus warn";
+    s.innerHTML = "校验服务暂不可用（可能离线或被限流）。请点"+
+      '<a href="https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(q)+'" target="_blank">谷歌地图</a>人工核对。';
+  }
+}
+
+// preset filling
+document.getElementById("payPreset").addEventListener("change", e=>{
+  document.getElementById("paySchedule").value = PAY_PRESETS[e.target.value] || "";
+  render();
+});
+
+// live update
+document.querySelectorAll("input, select, textarea").forEach(el=>{
+  el.addEventListener("input", render);
+  el.addEventListener("change", render);
+});
+
+// auto-parse when pasting OR when leaving the address box (covers manual typing too)
+document.getElementById("addrPaste").addEventListener("paste", ()=> setTimeout(parsePaste, 30));
+document.getElementById("addrPaste").addEventListener("blur", ()=> parsePaste());
+
+// defaults
+document.getElementById("advSigner").value = "Bella";
+document.getElementById("payPreset").value = "5";
+document.getElementById("paySchedule").value = PAY_PRESETS["5"];
+render();
+</script>
+</body>
+</html>
