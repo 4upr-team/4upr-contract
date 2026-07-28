@@ -1,0 +1,153 @@
+<!DOCTYPE html><html><head><meta charset="UTF-8">
+<link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  :root{
+    --accent:#4f46e5; --accent2:#7c3aed; --accent-soft:#eef0ff;
+    --ink:#1b1e2b; --muted:#6b7180; --line:#e5e9f2; --panel:#ffffff;
+  }
+  body { margin: 0; font-family: -apple-system, "PingFang SC", "Microsoft YaHei", Arial, sans-serif;
+    background: linear-gradient(160deg,#eaeefb 0%,#f4f5fa 45%,#f6f4fb 100%); color: var(--ink); min-height: 100vh; }
+  .topbar{ display:flex; align-items:center; gap:14px; padding:15px 26px;
+    background:linear-gradient(100deg,#4f46e5 0%,#6d28d9 55%,#7c3aed 100%); color:#fff;
+    box-shadow:0 6px 22px rgba(79,70,229,.30); position:sticky; top:0; z-index:20; }
+  .brandmark{ font-weight:800; letter-spacing:.5px; font-size:17px; background:rgba(255,255,255,.15);
+    border:1px solid rgba(255,255,255,.4); padding:8px 12px; border-radius:10px; }
+  .apptitle{ font-size:18px; font-weight:700; line-height:1.15; }
+  .appsub{ font-size:11.5px; opacity:.85; margin-top:2px; letter-spacing:.3px; }
+  .wrap { display: flex; gap: 20px; padding: 20px; align-items: flex-start; }
+  .panel { background: var(--panel); border-radius: 14px; box-shadow: 0 8px 26px rgba(30,34,60,.09); border:1px solid #edf0f7; }
+  .form { flex: 0 0 430px; padding: 22px; position: sticky; top: 84px; max-height: calc(100vh - 104px); overflow-y: auto; }
+  .previewWrap { flex: 1; min-width: 0; }
+  h1 { font-size: 18px; margin: 0 0 4px; color: var(--ink); }
+  .sub { font-size: 12px; color: var(--muted); margin: 0 0 16px; }
+  .grp { margin-bottom: 14px; }
+  .form h3 { font-size: 12px; text-transform: uppercase; letter-spacing: .6px; color: var(--accent);
+    margin: 20px 0 9px; padding: 0 0 5px 10px; border-bottom: 1px solid var(--line); border-left: 3px solid var(--accent); }
+  label { display: block; font-size: 12px; font-weight: 600; margin: 8px 0 3px; color: #3a3f4d; }
+  input, select, textarea { width: 100%; padding: 9px 11px; border: 1px solid #d3d9e4; border-radius: 9px; font-size: 13px; font-family: inherit; background:#fcfdff; transition:border-color .15s, box-shadow .15s; }
+  input:focus, select:focus, textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(79,70,229,.15); }
+  textarea { resize: vertical; min-height: 64px; }
+  .row2 { display: flex; gap: 8px; }
+  .row2 > div { flex: 1; }
+  .checks { display: flex; gap: 16px; margin-top: 4px; }
+  .checks label { display: flex; align-items: center; gap: 5px; font-weight: 500; margin: 0; }
+  .checks input { width: auto; }
+  .btns { margin-top: 20px; display: flex; gap: 10px; }
+  button { flex: 1; padding: 11px; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; }
+  .primary { background: linear-gradient(100deg,var(--accent),var(--accent2)); color: #fff; box-shadow: 0 5px 16px rgba(79,70,229,.35); }
+  .primary:hover { filter: brightness(1.06); transform: translateY(-1px); }
+  .ghost { background: #f3f4fb; color: #3a3f4d; border: 1px solid #dde1ec; }
+  .ghost:hover { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
+  .hint { font-size: 11px; color: #888; margin-top: 6px; line-height: 1.4; }
+  .astatus { font-size: 12px; margin: 6px 0 2px; line-height: 1.45; }
+  .astatus.ok { color: #1a7f37; }
+  .astatus.warn { color: #b3541e; }
+  .astatus.busy { color: #4169b8; }
+  .minibtns { display: flex; gap: 8px; margin-top: 8px; }
+  .minibtns button { padding: 8px; font-size: 12px; }
+
+  /* ---- Contract preview (A4) ---- */
+  .previewWrap { display: flex; justify-content: center; }
+  #doc { background: #fff; width: 794px; padding: 54px 62px; font-size: 12px; line-height: 1.5; color: #000; }
+  #doc .title { text-align: center; font-size: 17px; font-weight: bold; margin: 0 0 4px; }
+  #doc .subtitle { text-align: center; font-size: 13px; font-weight: bold; margin: 0 0 14px; }
+  #doc .intro { margin-bottom: 12px; }
+  #doc table.k { width: 100%; border-collapse: collapse; }
+  #doc table.k td { border: 1px solid #999; padding: 6px 9px; vertical-align: top; }
+  #doc table.k td.lbl { width: 165px; font-weight: bold; }
+  #doc .pr p { margin: 2px 0; }
+  #doc .sig { width: 100%; border-collapse: collapse; margin-top: 6px; page-break-inside: avoid; }
+  #doc .sig tr, #doc .sig td { page-break-inside: avoid; }
+  #doc .sig td { width: 50%; border: 1px solid #999; padding: 8px 10px; vertical-align: top; }
+  #doc .sig .sp { height: 20px; }
+  #doc .campaign p { margin: 3px 0; }
+  #doc td.keyhl { background: #fffbe6; }
+  #doc .hl { background: #fff2a8; padding: 1px 3px; font-weight: bold; }
+  #doc .autosign { font-family: 'Dancing Script','Snell Roundhand','Segoe Script','Bradley Hand',cursive; font-size: 30px; line-height: 1; color: #111; }
+  #doc .signline { border-bottom: 1px solid #333; height: 44px; width: 82%; margin: 6px 0 4px; position: relative; }
+  #doc .signline .hint { position: absolute; bottom: 2px; left: 2px; font-size: 9px; color: #aaa; }
+  #doc .signline .autosign { position: absolute; bottom: 3px; left: 6px; }
+  #doc .note { font-style: italic; font-size: 10.5px; border-top: 1px solid #999; margin-top: 16px; padding-top: 8px; color: #222; }
+  #doc b { font-weight: bold; }
+  @media (max-width: 1180px){ .wrap{flex-direction:column;} .form{position:static;flex:1 1 auto;width:100%;} }
+
+  /* Print / Save-as-PDF: show only the contract, keep highlight colours */
+  @media print {
+    /* margin:0 leaves the browser no room to draw its date/URL header & footer -> they disappear.
+       The page's own margins are recreated as padding inside #doc below. */
+    @page { size: A4; margin: 0; }
+    html, body { background: #fff !important; margin: 0 !important; }
+    .topbar, .form, .btns, .minibtns, .hint { display: none !important; }
+    .wrap { display: block !important; padding: 0 !important; gap: 0 !important; }
+    .previewWrap { display: block !important; padding: 0 !important; }
+    .panel { box-shadow: none !important; border: none !important; border-radius: 0 !important; }
+    #doc { width: 100% !important; padding: 14mm 15mm !important; }
+    #doc, #doc * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+  }
+
+ body{background:#eef0f7;padding:24px;} .previewWrap{display:flex;justify-content:center;}
+ #doc{box-shadow:0 8px 30px rgba(0,0,0,.15);}</style></head>
+<body><div class="previewWrap"><div id="doc">
+    <p class="title">MollyJeweryUS &amp; vikketech</p>
+    <p class="subtitle">ONLINE PRODUCTION AND PROMOTIONAL SERVICES AGREEMENT</p>
+    <p class="intro">This Online Production and Promotional Services Agreement (the "Agreement"), effective as of <b>July 27, 2026</b> (the "Effective Date") constitutes the entire agreement between <b>4UPR COMPANY limited</b> ("Advertiser") and <b>vikketech</b> ("Talent").</p>
+    <table class="k">
+      <tbody><tr><td class="lbl">1. Talent:</td><td>vikketech</td></tr>
+      <tr><td class="lbl">2. Campaign:</td><td class="campaign keyhl"><p>Promotion of MollyJeweryUS (1 Dedicated Video (at least 45s) on TikTok, reposted to Instagram + Link in bio for 7 days + Usage right for 6 months)</p><p class="hl">Product sample: this sample must be RETURNED after the collaboration; both the outbound and return shipping costs are borne by 4UPR.</p></td></tr>
+      <tr><td class="lbl">3. Talent Contact:</td><td>
+    <p><b>Full name: </b>Viktor Kuznecki</p>
+    <p><b>Address (apt, house, street): </b>Leemkuilen 8</p>
+    <p><b>City: </b>Kaatsheuvel</p>
+    <p><b>State: </b>Noord Brabant</p>
+    <p><b>Country: </b>Netherlands</p>
+    <p><b>Postal code or ZIP code (P.O. Box): </b>5171 WV</p>
+    <p><b>Phone number: </b>+31 6 84 17 09 28</p></td></tr>
+      <tr><td class="lbl">4. Advertiser Contact:</td><td>
+        <p><b>Name: </b>4UPR COMPANY limited</p><p><b>E-mail: </b>bella@4upr.org</p>
+        <p><b>Phone number: </b>2054470684</p><p><b>Address: </b>3421 SW ROXBURY ST APT 407 SEATTLE WA 98126</p></td></tr>
+      <tr><td class="lbl">5. Deliverables:</td><td class="pr">
+        <p>Talent shall deliver one permanent video on</p><p>https://www.instagram.com/vikketech/</p><p>https://www.tiktok.com/@vikketech</p>
+        <p style="margin-top:8px"><b>Promotional Requirement(s):</b></p><p>1.&nbsp; Video Duration: at least 45 s, Usage right for 6 months</p><p>2.&nbsp; Video Delivery time: The timeline shall be mutually agreed upon by both parties. The talent shall collaborate with the advertiser to discuss and submit the script within 14 business days of receiving the product. Filming may only commence once the script is approved by the brand. A draft video must be submitted within 7 business days after script approved. The video may only be published once approved by the brand. <span class="hl">If the talent does not film in accordance with the script approved by the brand, the brand shall have the right to request a re-shoot or revisions to the video (no more than two (2) rounds of revisions).</span></p><p>3.&nbsp; Post time: agreed upon by both parties</p><p>4.&nbsp; The talent needs to display the brand logo, selling points, using feeling, and other requirements provided by Advertiser then call to action. (The advertiser will tell what the video needs to be shot, and the talent will self-edit the rest)</p><p>5.&nbsp; The talent should provide the unlisted link to Advertiser before posting.</p><p>6.&nbsp; The talent needs to provide AD ID (spark code) after the video post (6 months).</p><p>7.&nbsp; There should be no negative content in the promotion video(s)/post(s). After signing the contract with the brand, talent should not publish any brand-related behaviors or statements that are detrimental to the brand, once published, the talent will be held legally responsible and financially liable for any damage caused. Objective and truthful product reviews or good-faith opinions shall not constitute a breach of this clause; only proven malicious or false disparagement shall trigger liability.</p><p>8.&nbsp; The brand has the right to unilaterally cancel the cooperation and not pay the cooperation fee if:<br><span style="margin-left:18px">* The video is released beyond the time specified by the brand</span><br><span style="margin-left:18px">* Talent has bad events, such as negative news, crime, etc., which affect the brand image</span><br><span style="margin-left:18px">* Not cooperating to produce the video as required</span></p><p>9.&nbsp; Unilateral Cancellation of Contracts<br><span style="margin-left:18px">Ensure the legitimate rights and interests of both parties. Unauthorized cancellation (including loss of contact) by any of the parties to the contract at the following points of cooperation requires compensation for losses to the other party.</span><br><span style="margin-left:18px">1. Received the product, but not yet shot: 50% of the contract amount.</span><br><span style="margin-left:18px">2. Draft video has been shot: 80% of the contract amount.</span><br><span style="margin-left:18px">In the event of any conflict between clause 9 and clause 10, this clause 10 shall prevail.</span></p></td></tr>
+      <tr><td class="lbl">6. Payment:</td><td class="pr">
+        <p><span class="hl">The fee for this collaboration is £100.</span></p>
+        <p>Payment Method: PayPal OR Bank Transfer.</p>
+        <p>Full payment shall be made within 7 business days after the talent has delivered all agreed deliverables of the collaboration.</p>
+        <p><span class="hl">4UPR shall bear all transaction/transfer fees incurred in making the payment.</span></p>
+        </td></tr>
+      <tr><td class="lbl">7. Approvals:</td><td class="pr">
+<p>Advertiser shall have:</p>
+<p>. The right to approve the creative shooting ideas of the video;</p>
+<p>. The right to ask the talent to revise the rough cut of video(s) up to two (2) times within Three (3) business days (otherwise such rough cut shall be deemed approved).</p>
+<p>. If the video content does not show the brand's selling point at all and does not meet the brand's filming requirements, the brand has the right to ask the talent to re-shoot the video.</p>
+<p>. If the collaboration is not completed and the video is not released on time because of influencer, the brand has the right not to pay any fees.</p><p>. The script shall be jointly agreed upon by the talent and the brand. If the video is not filmed in accordance with the agreed script, the brand has the right to request a re-shoot or revisions (the number of revisions shall not exceed two). If the talent publishes any video without the brand's prior approval, it shall constitute a breach of this Agreement, and the brand shall have the right to cancel the collaboration and require the return of the product.</p></td></tr>
+      <tr><td class="lbl">8. Additional Contract edits/add ons:</td><td class="pr">
+<p>Talent owns content, but is creating it for the brand, lending their name &amp; likeness. The Creator grants the Brand a 6-month authorization to use the Creator's Partnership Ads code for paid media amplification, and the Brand shall have full usage rights to all delivered assets across paid advertising, social media reposting, website, and organic marketing channels.</p>
+<p>All sponsored content will include the required disclosures, tags, and platform labels in accordance with applicable platform guidelines.</p>
+<p>Once the content is live, brand reserves the rights of using the content (post/video) produced by the partner on a global, non-exclusive basis for a period of 6 months. The Partner undertakes not to infringe the rights of any third party in the content produced, otherwise shall bear all losses caused to the brand as a result.</p><p>Once published, the video(s)/post(s) shall remain publicly available permanently and must not be hidden, set to private, unlisted, or deleted at any time. Any such action shall be deemed a material breach of this Agreement.</p><p>Product sample: the product sample provided for this collaboration is provided on loan and must be returned after filming. Both the outbound shipping cost (sending the sample to the talent) and the return shipping cost (returning the sample) shall be borne by 4UPR.</p><p>4UPR COMPANY limited enters into this Agreement as the authorized agent of, and on behalf of, the MollyJeweryUS. The MollyJeweryUS is an intended third-party beneficiary of this Agreement and may directly enforce the rights and licenses granted to it hereunder.</p><p>The compensation percentages and amounts set out in this Agreement represent a genuine pre-estimate of the losses that would be suffered and are agreed as liquidated damages, not as a penalty. Save for such liquidated damages and for any liability that cannot be limited or excluded under applicable law, neither party's total aggregate liability under this Agreement shall exceed the total fee payable hereunder.</p><p>Both parties shall keep confidential the terms of this Agreement (including the fee) and any non-public information disclosed in connection with the collaboration, and shall not disclose the same to any third party without prior written consent, except as required by law or by applicable platform disclosure/labeling rules.</p></td></tr>
+    </tbody></table>
+    <p style="margin-top:12px">In witness whereof, the parties hereto have executed this Agreement as of the Effective Date: <b>July 27, 2026</b></p>
+    <table class="sig">
+      <tbody><tr>
+        <td>
+          <b>TALENT:</b><br><b>vikketech</b>
+          <div class="sp"></div>
+          By (sign):
+          <div class="signline"><span class="hint">Signature</span></div>
+          Print name: Viktor Kuznecki<br>
+          Its: Talent<br>
+          Date: ____________________
+        </td>
+        <td>
+          <b>ADVERTISER:</b><br><b>4UPR COMPANY limited</b>
+          <div class="sp"></div>
+          By (sign):
+          <div class="signline"><span class="autosign">Bella</span></div>
+          Print name: Bella<br>
+          Its: Marketing Manager<br>
+          Date: July 27, 2026
+        </td>
+      </tr>
+    </tbody></table>
+    <p style="font-size:10.5px; margin-top:8px">This Agreement may be executed electronically and in one or more counterparts, each of which shall be deemed an original and all of which together shall constitute one and the same agreement.</p>
+    <p class="note">*Note: We are a third-party media agency and cooperate with the MollyJeweryUS brand. The talent signed a contract with our company "4UPR COMPANY limited" instead of the MollyJeweryUS brand. All cooperation details should be communicated with "4UPR COMPANY limited". Please do not cross our company and contact MollyJeweryUS official brand directly, otherwise it is a breach of contract.</p></div></div></body></html>
