@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>4UPR Contract Platform</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  :root{
+    --accent:#4f46e5; --accent2:#7c3aed; --accent-soft:#eef0ff;
+    --ink:#1b1e2b; --muted:#6b7180; --line:#e5e9f2; --panel:#ffffff;
+  }
+  body { margin: 0; font-family: -apple-system, "PingFang SC", "Microsoft YaHei", Arial, sans-serif;
+    background: linear-gradient(160deg,#eaeefb 0%,#f4f5fa 45%,#f6f4fb 100%); color: var(--ink); min-height: 100vh; }
+  .topbar{ display:flex; align-items:center; gap:14px; padding:15px 26px;
+    background:linear-gradient(100deg,#4f46e5 0%,#6d28d9 55%,#7c3aed 100%); color:#fff;
+    box-shadow:0 6px 22px rgba(79,70,229,.30); position:sticky; top:0; z-index:20; }
+  .brandmark{ font-weight:800; letter-spacing:.5px; font-size:17px; background:rgba(255,255,255,.15);
+    border:1px solid rgba(255,255,255,.4); padding:8px 12px; border-radius:10px; }
+  .apptitle{ font-size:18px; font-weight:700; line-height:1.15; }
+  .appsub{ font-size:11.5px; opacity:.85; margin-top:2px; letter-spacing:.3px; }
+  .wrap { display: flex; gap: 20px; padding: 20px; align-items: flex-start; }
+  .panel { background: var(--panel); border-radius: 14px; box-shadow: 0 8px 26px rgba(30,34,60,.09); border:1px solid #edf0f7; }
+  .form { flex: 0 0 430px; padding: 22px; position: sticky; top: 84px; max-height: calc(100vh - 104px); overflow-y: auto; }
+  .previewWrap { flex: 1; min-width: 0; }
+  h1 { font-size: 18px; margin: 0 0 4px; color: var(--ink); }
+  .sub { font-size: 12px; color: var(--muted); margin: 0 0 16px; }
+  .form h3 { font-size: 12px; text-transform: uppercase; letter-spacing: .6px; color: var(--accent);
+    margin: 20px 0 9px; padding: 0 0 5px 10px; border-bottom: 1px solid var(--line); border-left: 3px solid var(--accent); }
+  label { display: block; font-size: 12px; font-weight: 600; margin: 8px 0 3px; color: #3a3f4d; }
+  input, select, textarea { width: 100%; padding: 9px 11px; border: 1px solid #d3d9e4; border-radius: 9px; font-size: 13px; font-family: inherit; background:#fcfdff; transition:border-color .15s, box-shadow .15s; }
+  input:focus, select:focus, textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(79,70,229,.15); }
+  textarea { resize: vertical; min-height: 64px; }
+  #campaign { min-height: 130px; }
+  .row2 { display: flex; gap: 8px; }
+  .row2 > div { flex: 1; }
+  .checks { display: flex; gap: 16px; margin-top: 4px; flex-wrap: wrap; }
+  .checks label { display: flex; align-items: center; gap: 5px; font-weight: 500; margin: 0; }
+  .checks input { width: auto; }
+  .btns { margin-top: 20px; display: flex; gap: 10px; }
+  button { flex: 1; padding: 11px; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; }
+  .primary { background: linear-gradient(100deg,var(--accent),var(--accent2)); color: #fff; box-shadow: 0 5px 16px rgba(79,70,229,.35); }
+  .primary:hover { filter: brightness(1.06); transform: translateY(-1px); }
+  .ghost { background: #f3f4fb; color: #3a3f4d; border: 1px solid #dde1ec; }
+  .ghost:hover { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
+  .hint { font-size: 11px; color: #888; margin-top: 6px; line-height: 1.4; }
+  .astatus { font-size: 12px; margin: 6px 0 2px; line-height: 1.5; }
+  .astatus.ok { color: #1a7f37; }
+  .astatus.warn { color: #b3541e; }
+  .astatus.busy { color: #4169b8; }
+  .astatus b { color: #14532d; }
+  .minibtns { display: flex; gap: 8px; margin-top: 8px; }
+  .minibtns button { padding: 8px; font-size: 12px; }
+
+  /* collapsible blocks */
+  details.ovr { border:1px solid var(--line); border-radius:10px; padding:8px 10px; margin-bottom:8px; background:#fbfcff; }
+  details.ovr summary { font-size:12px; font-weight:700; color:#3a3f4d; cursor:pointer; list-style:none; }
+  details.ovr summary::-webkit-details-marker { display:none; }
+  details.ovr summary:before { content:"▸ "; color:var(--accent); }
+  details.ovr[open] summary:before { content:"▾ "; }
+  details.ovr .ovrTag { font-size:10.5px; font-weight:600; color:#b3541e; margin-left:6px; }
+  details.ovr textarea { min-height:150px; font-size:12px; line-height:1.45; }
+
+  /* ---- Contract preview (A4) ---- */
+  .previewWrap { display: flex; justify-content: center; }
+  #doc { background: #fff; width: 794px; padding: 54px 62px; font-size: 12px; line-height: 1.5; color: #000; }
+  #doc .title { text-align: center; font-size: 17px; font-weight: bold; margin: 0 0 4px; }
+  #doc .subtitle { text-align: center; font-size: 13px; font-weight: bold; margin: 0 0 14px; }
+  #doc .intro { margin-bottom: 12px; }
+  #doc table.k { width: 100%; border-collapse: collapse; }
+  #doc table.k td { border: 1px solid #999; padding: 6px 9px; vertical-align: top; }
+  #doc table.k td.lbl { width: 165px; font-weight: bold; }
+  #doc .pr p { margin: 2px 0; }
+  #doc .sig { width: 100%; border-collapse: collapse; margin-top: 6px; page-break-inside: avoid; }
+  #doc .sig tr, #doc .sig td { page-break-inside: avoid; }
+  #doc .sig td { width: 50%; border: 1px solid #999; padding: 8px 10px; vertical-align: top; }
+  #doc .sig .sp { height: 20px; }
+  #doc .campaign p { margin: 3px 0; }
+  #doc td.keyhl { background: #fffbe6; }
+  #doc .hl { background: #fff2a8; padding: 1px 3px; font-weight: bold; }
+  #doc .autosign { font-family: 'Dancing Script','Snell Roundhand','Segoe Script','Bradley Hand',cursive; font-size: 30px; line-height: 1; color: #111; }
+  #doc .signline { border-bottom: 1px solid #333; height: 44px; width: 82%; margin: 6px 0 4px; position: relative; }
+  #doc .signline .hint { position: absolute; bottom: 2px; left: 2px; font-size: 9px; color: #aaa; }
+  #doc .signline .autosign { position: absolute; bottom: 3px; left: 6px; }
+  #doc .note { font-style: italic; font-size: 10.5px; border-top: 1px solid #999; margin-top: 16px; padding-top: 8px; color: #222; }
+  #doc b { font-weight: bold; }
+  @media (max-width: 1180px){ .wrap{flex-direction:column;} .form{position:static;flex:1 1 auto;width:100%;} }
+
+  /* Print / Save-as-PDF: show only the contract, keep highlight colours */
+  @media print {
+    @page { size: A4; margin: 0; }
+    html, body { background: #fff !important; margin: 0 !important; }
+    .topbar, .form, .btns, .minibtns, .hint { display: none !important; }
+    .wrap { display: block !important; padding: 0 !important; gap: 0 !important; }
+    .previewWrap { display: block !important; padding: 0 !important; }
+    .panel { box-shadow: none !important; border: none !important; border-radius: 0 !important; }
+    #doc { width: 100% !important; padding: 14mm 15mm !important; }
+    #doc, #doc * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+  }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="brandmark">4UPR</div>
+  <div>
+    <div class="apptitle">4UPR Contract Platform</div>
+    <div class="appsub">Influencer Collaboration Agreement Generator</div>
+  </div>
+</header>
+<div class="wrap">
+  <!-- FORM -->
+  <div class="panel form">
+    <h1>合同信息</h1>
+    <p class="sub">填写变量信息，右侧实时预览，点"下载 PDF"发给网红。公司信息与标准条款已内置。</p>
+
+    <h3>品牌</h3>
+    <label>合作品牌</label>
+    <select id="brand">
+      <option value="Blacklyte">Blacklyte</option>
+      <option value="MollyJeweryUS">MollyJeweryUS</option>
+    </select>
+    <div id="mollyOpts" style="display:none">
+      <label>样品处理（仅 MollyJeweryUS）</label>
+      <select id="sampleMode">
+        <option value="return">借用，拍摄后退回（退回运费由品牌承担）</option>
+        <option value="gift">赠送，网红自留</option>
+      </select>
+    </div>
+
+    <h3>网红信息</h3>
+    <label>网红 ID / 昵称 (handle)</label>
+    <input id="handle" placeholder="例如 vikketech">
+    <label>全名</label>
+    <input id="fullname" placeholder="例如 Viktor Kuznecki">
+
+    <label>整段粘贴地址（粘贴后自动识别到下方字段）</label>
+    <textarea id="addrPaste" placeholder="把网红发来的整段地址直接粘进来，例如：&#10;Name: Viktor Kuznecki&#10;Address: Leemkuilen 8&#10;City: Kaatsheuvel&#10;State: Noord Brabant&#10;Zip Code: 5171 WV&#10;Country: Netherlands&#10;Phone: +31 6 84 17 09 28"></textarea>
+    <div class="minibtns">
+      <button type="button" class="ghost" onclick="parsePaste()">自动识别</button>
+      <button type="button" class="ghost" onclick="verifyAddr()">校验地址</button>
+    </div>
+    <div id="addrStatus" class="astatus"></div>
+
+    <label>地址（街道/门牌）</label>
+    <input id="addr" placeholder="例如 Leemkuilen 8">
+    <div class="row2">
+      <div><label>城市</label><input id="city"></div>
+      <div><label>省/州/地区</label><input id="state"></div>
+    </div>
+    <div class="row2">
+      <div><label>国家</label><input id="country"></div>
+      <div><label>邮编</label><input id="zip"></div>
+    </div>
+    <label>电话</label>
+    <input id="phone" placeholder="+31 6 84 17 09 28">
+
+    <h3>平台链接</h3>
+    <div class="checks">
+      <label><input type="checkbox" id="useTT" checked> TikTok</label>
+      <label><input type="checkbox" id="useIG" checked> Instagram</label>
+      <label><input type="checkbox" id="useYT"> YouTube</label>
+    </div>
+    <label>TikTok 链接</label>
+    <input id="ttLink" placeholder="https://www.tiktok.com/@vikketech">
+    <label>Instagram 链接</label>
+    <input id="igLink" placeholder="https://www.instagram.com/vikketech/">
+    <label>YouTube 链接</label>
+    <input id="ytLink" placeholder="https://www.youtube.com/@vikketech">
+    <label>主平台（视频发在哪，其余为转发）</label>
+    <select id="mainPlat"></select>
+
+    <h3>合作内容</h3>
+    <label>整段粘贴合作内容（粘贴后自动识别时长、使用权等）</label>
+    <textarea id="campaign" placeholder="把谈好的合作内容整段粘进来，例如：&#10;1 × Dedicated 8-10 minute YouTube video&#10;5 × Photos (for brand use only; no public posting required)&#10;Full Usage Rights for All Assets: Advertising usage, Social media reposting, Website and organic channels&#10;Link in bio for 7 days"></textarea>
+    <div class="minibtns">
+      <button type="button" class="ghost" onclick="parseCampaign(true)">重新识别</button>
+      <button type="button" class="ghost" onclick="insertTemplate()">插入默认模板</button>
+    </div>
+    <div id="campStatus" class="astatus"></div>
+
+    <details class="ovr" id="derivedBox" style="margin-top:10px">
+      <summary>识别结果（可手动修正）<span class="ovrTag" id="tagDerived"></span></summary>
+      <label>视频时长</label>
+      <div class="row2">
+        <div><input id="durMin" type="number" min="1" placeholder="45"></div>
+        <div><input id="durMax" type="number" min="1" placeholder="上限（可空）"></div>
+        <div style="flex:0 0 88px"><select id="durUnit">
+          <option value="s">秒</option>
+          <option value="min">分钟</option>
+        </select></div>
+      </div>
+      <label>使用权 / 授权期限</label>
+      <select id="usageMode">
+        <option value="6">6 个月</option>
+        <option value="12">12 个月</option>
+        <option value="custom">自定义月数</option>
+        <option value="perpetual">永久无期限（Full usage rights）</option>
+      </select>
+      <div id="usageCustomWrap" style="display:none">
+        <label>自定义月数</label>
+        <input id="usageMonths" type="number" min="1" value="6">
+      </div>
+      <div class="checks" style="margin-top:10px">
+        <label><input type="checkbox" id="needSpark" checked> 需要广告码 / Spark code</label>
+        <label><input type="checkbox" id="bioOn" checked> Link in bio</label>
+      </div>
+      <div class="row2" style="margin-top:6px">
+        <div><label>Bio 挂链天数</label><input id="bioDays" type="number" min="1" value="7"></div>
+        <div><label>修改轮次</label><input id="revisions" type="number" min="1" value="2"></div>
+      </div>
+      <p class="hint">这些值只影响第 5 / 7 / 8 节的条款措辞。第 2 节 Campaign 永远原样显示你粘贴的内容。</p>
+    </details>
+
+    <h3>费用与付款</h3>
+    <label>合作费用</label>
+    <div class="row2">
+      <div style="flex:0 0 130px"><select id="currency">
+        <option value="USD">USD ($)</option>
+        <option value="GBP">GBP (£)</option>
+        <option value="EUR">EUR (€)</option>
+      </select></div>
+      <div><input id="fee" type="number" placeholder="100"></div>
+    </div>
+    <label>付款条款（选预设，可再编辑）</label>
+    <select id="payPreset">
+      <option value="5">交付全部合作内容后 7 个工作日内付清（标准）</option>
+      <option value="1">上线后一次性付清（4UPR 承担手续费）</option>
+      <option value="2">验收后付 50% + 完成 7 个工作日内付 50%</option>
+      <option value="3">收货预付 50% + 验收后付 50%</option>
+      <option value="4">发布且 bio 挂满 7 天后 3 个工作日内付清</option>
+      <option value="0">自定义 / 不加付款排期</option>
+    </select>
+    <textarea id="paySchedule" placeholder="付款排期英文说明"></textarea>
+
+    <h3>高级：手动改写条款</h3>
+    <p class="hint" style="margin-top:0">自动生成覆盖不到的特例，在这里直接改英文（每行一条）。勾上后该节以下面的文本为准。</p>
+
+    <details class="ovr" id="ovrBox5">
+      <summary>第 5 节 Deliverables<span class="ovrTag" id="tag5"></span></summary>
+      <div class="checks" style="margin:8px 0 6px">
+        <label><input type="checkbox" id="ovr5"> 手动编辑本节</label>
+      </div>
+      <textarea id="ovrText5" placeholder="勾选后自动载入当前生成的内容"></textarea>
+      <div class="minibtns">
+        <button type="button" class="ghost" onclick="reloadOvr('5')">重新载入自动内容</button>
+        <button type="button" class="ghost" onclick="clearOvr('5')">恢复自动生成</button>
+      </div>
+    </details>
+
+    <details class="ovr" id="ovrBox7">
+      <summary>第 7 节 Approvals<span class="ovrTag" id="tag7"></span></summary>
+      <div class="checks" style="margin:8px 0 6px">
+        <label><input type="checkbox" id="ovr7"> 手动编辑本节</label>
+      </div>
+      <textarea id="ovrText7" placeholder="勾选后自动载入当前生成的内容"></textarea>
+      <div class="minibtns">
+        <button type="button" class="ghost" onclick="reloadOvr('7')">重新载入自动内容</button>
+        <button type="button" class="ghost" onclick="clearOvr('7')">恢复自动生成</button>
+      </div>
+    </details>
+
+    <details class="ovr" id="ovrBox8">
+      <summary>第 8 节 Additional<span class="ovrTag" id="tag8"></span></summary>
+      <div class="checks" style="margin:8px 0 6px">
+        <label><input type="checkbox" id="ovr8"> 手动编辑本节</label>
+      </div>
+      <textarea id="ovrText8" placeholder="勾选后自动载入当前生成的内容"></textarea>
+      <div class="minibtns">
+        <button type="button" class="ghost" onclick="reloadOvr('8')">重新载入自动内容</button>
+        <button type="button" class="ghost" onclick="clearOvr('8')">恢复自动生成</button>
+      </div>
+    </details>
+
+    <h3>签署</h3>
+    <label>推广人员姓名（广告主签署人）</label>
+    <input id="advSigner" placeholder="例如 Bella">
+    <label>广告主联系邮箱</label>
+    <input id="advEmail" value="bella@4upr.org">
+    <label>推广人员职位</label>
+    <input id="advTitle" value="Marketing Manager">
+    <label>签署日期</label>
+    <input id="date" type="date">
+
+    <div class="btns">
+      <button class="primary" onclick="printPDF()">下载 PDF</button>
+    </div>
+    <p class="hint">点"下载 PDF"→ 弹出窗口把"目标 / 打印机"选为"另存为 PDF"→ 保存。已自动去掉网址和日期页眉页脚，分页为可选中的矢量文字。</p>
+  </div>
+
+  <!-- PREVIEW -->
+  <div class="previewWrap panel" style="padding:20px;">
+    <div id="doc"></div>
+  </div>
+</div>
+
+<script>
+const ADV = {
+  name: "4UPR COMPANY limited",
+  email: "info@4upr.org",
+  phone: "2054470684",
+  addr: "3421 SW ROXBURY ST APT 407 SEATTLE WA 98126"
+};
+const CUR_SYMBOL = { USD: "$", GBP: "£", EUR: "€" };
+const PAY_PRESETS = {
+  "1": "Payment schedule: The full fee shall be paid in one lump sum after the video goes live. All payment/transaction fees shall be borne by 4UPR.",
+  "2": "Payment schedule: 50% of the fee shall be paid after the video is approved by the brand; the remaining 50% shall be paid within 7 business days after completion of the collaboration. All payment/transaction fees shall be borne by 4UPR.",
+  "3": "Payment schedule: 50% prepaid upon the talent receiving the product; the remaining 50% paid upon the brand's approval of the video. Both payments are inclusive of all transaction/handling fees (borne by 4UPR).",
+  "4": "Full payment shall be finished within 3 business days after the video is published and the bio link has completed its 7-day placement.",
+  "5": "Full payment shall be made within 7 business days after the talent has delivered all agreed deliverables of the collaboration.",
+  "0": ""
+};
+
+function esc(s){ return (s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+function val(id){ const e = document.getElementById(id); return e ? e.value.trim() : ""; }
+function chk(id){ const e = document.getElementById(id); return e ? e.checked : false; }
+function setV(id,v){ const e = document.getElementById(id); if(e) e.value = v; }
+function setC(id,v){ const e = document.getElementById(id); if(e) e.checked = !!v; }
+function fmtDate(v){
+  if(!v) return "__________";
+  const [y,m,d] = v.split("-").map(Number);
+  const M = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+  return `${M[m-1]} ${d}, ${y}`;
+}
+
+/* =========================================================
+   平台
+   ========================================================= */
+function platforms(){
+  const p = [];
+  if(chk("useTT")) p.push("TikTok");
+  if(chk("useIG")) p.push("Instagram");
+  if(chk("useYT")) p.push("YouTube");
+  return p;
+}
+function syncMainPlat(){
+  const sel = document.getElementById("mainPlat");
+  const plats = platforms();
+  const keep = sel.value;
+  sel.innerHTML = plats.map(p=>`<option value="${p}">${p}</option>`).join("")
+    || '<option value="">（未勾选平台）</option>';
+  sel.value = plats.includes(keep) ? keep : (plats[0] || "");
+}
+function mainPlatform(){
+  const plats = platforms();
+  const v = document.getElementById("mainPlat").value;
+  return plats.includes(v) ? v : (plats[0] || "");
+}
+
+/* =========================================================
+   从"识别结果"读配置 —— 全合同的唯一真源
+   ========================================================= */
+function durPhrase(){
+  const a = val("durMin"), b = val("durMax");
+  const unit = document.getElementById("durUnit").value === "min" ? "minutes" : "s";
+  if(!a && !b) return "at least 45 s";
+  if(a && b && a !== b) return `${a}–${b} ${unit}`;
+  return `at least ${a || b} ${unit}`;
+}
+
+const PERPETUAL = "perpetual, irrevocable, worldwide, non-exclusive and royalty-free";
+
+function usageCfg(){
+  const mode = document.getElementById("usageMode").value;
+  if(mode === "perpetual"){
+    return {
+      perpetual: true,
+      right:     `Usage rights: ${PERPETUAL}`,
+      forPeriod: "in perpetuity",
+      adPeriod:  "for the full authorization period",
+      grant:     `a ${PERPETUAL}`,
+      campaign:  `Full usage rights for all assets: ${PERPETUAL}`
+    };
+  }
+  const m = (mode === "custom" ? (val("usageMonths") || "6") : mode);
+  return {
+    perpetual: false,
+    right:     `Usage right for ${m} months`,
+    forPeriod: `for a period of ${m} months`,
+    adPeriod:  `${m} months`,
+    grant:     `a ${m}-month`,
+    campaign:  `Usage right for ${m} months`
+  };
+}
+
+function revCount(){ return Math.max(1, parseInt(val("revisions") || "2", 10) || 2); }
+function timesWord(n){ return n === 1 ? "once" : `up to ${n} times`; }
+
+/* =========================================================
+   ★ 合作内容自动识别（像地址那样，粘贴即解析）
+   ========================================================= */
+let lastParsed = "";
+
+function parseCampaign(force){
+  const raw = document.getElementById("campaign").value;
+  const s = document.getElementById("campStatus");
+  if(!raw.trim()){ s.className = "astatus"; s.textContent = ""; return; }
+  if(!force && raw === lastParsed) return;
+  lastParsed = raw;
+
+  const t = raw;
+  const got = [];      // 识别到的
+  const missed = [];   // 没识别到、用默认值的
+  let m;
+
+  // ---- 时长 ----
+  if((m = t.match(/(\d{1,3})\s*(?:[-–—~]|\s*to\s+|\s*至\s*)\s*(\d{1,3})\s*(?:minutes?|mins?|分钟)/i))){
+    setV("durMin", m[1]); setV("durMax", m[2]); setV("durUnit", "min");
+    got.push(`时长 <b>${m[1]}–${m[2]} minutes</b>`);
+  } else if((m = t.match(/(\d{1,3})\s*(?:[-–—~]|\s*to\s+|\s*至\s*)\s*(\d{1,3})\s*(?:seconds?|secs?|秒)/i))){
+    setV("durMin", m[1]); setV("durMax", m[2]); setV("durUnit", "s");
+    got.push(`时长 <b>${m[1]}–${m[2]} s</b>`);
+  } else if((m = t.match(/(\d{1,3})\s*(?:minutes?|mins?\b|分钟)/i))){
+    setV("durMin", m[1]); setV("durMax", ""); setV("durUnit", "min");
+    got.push(`时长 <b>at least ${m[1]} minutes</b>`);
+  } else if((m = t.match(/(\d{1,3})\s*\+?\s*(?:seconds?|secs?|秒)/i)) || (m = t.match(/(\d{1,3})\s*\+?s(?![a-z])/i))){
+    setV("durMin", m[1]); setV("durMax", ""); setV("durUnit", "s");
+    got.push(`时长 <b>at least ${m[1]} s</b>`);
+  } else {
+    missed.push(`时长（沿用 ${durPhrase()}）`);
+  }
+
+  // ---- 使用权 ----
+  if(/perpetu|in\s+perpetuity|unlimited|no\s+time\s+limit|forever|永久|无期限|full\s+usage\s+right/i.test(t)){
+    setV("usageMode", "perpetual");
+    got.push("使用权 <b>永久无期限</b>");
+  } else if((m = t.match(/(\d{1,2})\s*[-\s]?months?/i)) || (m = t.match(/(\d{1,2})\s*个月/))){
+    const mo = m[1];
+    if(mo === "6" || mo === "12"){ setV("usageMode", mo); }
+    else { setV("usageMode", "custom"); setV("usageMonths", mo); }
+    got.push(`使用权 <b>${mo} 个月</b>`);
+  } else {
+    missed.push("使用权（沿用当前设置）");
+  }
+
+  // ---- 广告码 / Spark code ----
+  if(/no\s+spark|without\s+spark|无广告码|不需要广告码|不用广告码/i.test(t)){
+    setC("needSpark", false); got.push("广告码 <b>不需要</b>");
+  } else if(/spark\s*code|\bspark\b|ad\s?id|广告码|授权码/i.test(t)){
+    setC("needSpark", true); got.push("广告码 <b>需要</b>");
+  } else {
+    setC("needSpark", chk("useTT"));
+    missed.push(`广告码（按平台默认：${chk("useTT") ? "需要" : "不需要"}）`);
+  }
+
+  // ---- Link in bio ----
+  const bioRe = /(?:link\s*in\s*bio|bio\s*link|挂链|主页链接)/i;
+  if(bioRe.test(t)){
+    setC("bioOn", true);
+    const bm = t.match(/(?:link\s*in\s*bio|bio\s*link|挂链|主页链接)[^\n]{0,24}?(\d{1,3})\s*(?:days?|天)/i)
+            || t.match(/(\d{1,3})\s*(?:days?|天)[^\n]{0,24}?(?:link\s*in\s*bio|bio\s*link|挂链)/i);
+    if(bm) setV("bioDays", bm[1]);
+    got.push(`Bio 挂链 <b>${val("bioDays") || 7} 天</b>`);
+  } else {
+    const byBrand = val("brand") !== "MollyJeweryUS";
+    setC("bioOn", byBrand);
+    missed.push(`Bio 挂链（按品牌默认：${byBrand ? "有，" + (val("bioDays") || 7) + " 天" : "无"}）`);
+  }
+
+  // ---- 修改轮次 ----
+  if((m = t.match(/(\d{1,2})\s*(?:rounds?|轮|次)\s*(?:of\s*)?(?:revisions?|修改)/i))
+   || (m = t.match(/(?:revisions?|修改)[^\n]{0,14}?(\d{1,2})\s*(?:rounds?|轮|次)/i))){
+    setV("revisions", m[1]);
+    got.push(`修改 <b>${m[1]} 轮</b>`);
+  } else {
+    missed.push(`修改轮次（沿用 ${revCount()} 轮）`);
+  }
+
+  // ---- 状态提示 ----
+  let html = "";
+  if(got.length) html += "✓ 已识别：" + got.join(" ｜ ");
+  if(missed.length) html += (html ? "<br>" : "") + "· 未提及：" + missed.join(" ｜ ");
+  html += '<br><span style="color:#888">不对的话展开下面「识别结果」手动改。第 2 节 Campaign 原样显示你粘贴的内容。</span>';
+  s.className = missed.length && !got.length ? "astatus warn" : "astatus ok";
+  s.innerHTML = html;
+
+  render();
+}
+
+function insertTemplate(){
+  const U = usageCfg();
+  const main = mainPlatform();
+  const others = platforms().filter(p => p !== main);
+  const lines = [];
+  let l0 = `1 × Dedicated video (${durPhrase()})`;
+  if(main){
+    l0 += ` on ${main}`;
+    if(others.length) l0 += `, reposted to ${others.join(" & ")}`;
+  }
+  lines.push(l0);
+  if(chk("bioOn")) lines.push(`Link in bio for ${val("bioDays") || "7"} days`);
+  lines.push(U.campaign);
+  document.getElementById("campaign").value = lines.join("\n");
+  lastParsed = lines.join("\n");
+  document.getElementById("campStatus").className = "astatus ok";
+  document.getElementById("campStatus").textContent = "已插入默认模板，可直接改。";
+  render();
+}
+
+/* =========================================================
+   条款生成
+   ========================================================= */
+const MOLLY_CLAUSE_BASE = ". The script shall be jointly agreed upon by the talent and the brand. If the video is not filmed in accordance with the agreed script, the brand has the right to request a re-shoot or revisions (the number of revisions shall not exceed __N__). If the talent publishes any video without the brand's prior approval, it shall constitute a breach of this Agreement, and the brand shall have the right to cancel the collaboration and require the return of the product.";
+const NODELETE = "Once published, the video(s)/post(s) shall remain publicly available permanently and must not be hidden, set to private, unlisted, or deleted at any time. Any such action shall be deemed a material breach of this Agreement.";
+const LIQDAM = "The compensation percentages and amounts set out in this Agreement represent a genuine pre-estimate of the losses that would be suffered and are agreed as liquidated damages, not as a penalty. Save for such liquidated damages and for any liability that cannot be limited or excluded under applicable law, neither party's total aggregate liability under this Agreement shall exceed the total fee payable hereunder.";
+const CONFID = "Both parties shall keep confidential the terms of this Agreement (including the fee) and any non-public information disclosed in connection with the collaboration, and shall not disclose the same to any third party without prior written consent, except as required by law or by applicable platform disclosure/labeling rules.";
+const ESIGN = "This Agreement may be executed electronically and in one or more counterparts, each of which shall be deemed an original and all of which together shall constitute one and the same agreement.";
+const PAYFEES = "4UPR shall bear all transaction/transfer fees incurred in making the payment.";
+function agencyClause(brand){
+  return `4UPR COMPANY limited enters into this Agreement as the authorized agent of, and on behalf of, the ${brand}. The ${brand} is an intended third-party beneficiary of this Agreement and may directly enforce the rights and licenses granted to it hereunder.`;
+}
+const MOLLY_SAMPLE = {
+  "return": "Product sample: the product sample provided for this collaboration is provided on loan and must be returned after filming. Both the outbound shipping cost (sending the sample to the talent) and the return shipping cost (returning the sample) shall be borne by 4UPR.",
+  "gift": "Product sample: the product sample provided for this collaboration is provided as a gift and may be kept by the talent. The outbound shipping cost shall be borne by 4UPR."
+};
+const NOTE = `*Note: We are a third-party media agency and cooperate with the Blacklyte brand. The talent signed a contract with our company "4UPR COMPANY limited" instead of the Blacklyte brand. All cooperation details should be communicated with "4UPR COMPANY limited". Please do not cross our company and contact Blacklyte official brand directly, otherwise it is a breach of contract.`;
+
+function buildPromo(brand, U){
+  const isMolly = brand === "MollyJeweryUS";
+  const n = revCount();
+  const revision = isMolly
+    ? `<span class="hl">If the talent does not film in accordance with the script approved by the brand, the brand shall have the right to request a re-shoot or revisions to the video (no more than ${n} round(s) of revisions).</span>`
+    : `The talent agrees to accept at least ${n} round(s) of reasonable revisions requested by the brand.`;
+
+  const items = [];
+  items.push(`Video Duration: ${durPhrase()}, ${U.right}`);
+  items.push(`Video Delivery time: The timeline shall be mutually agreed upon by both parties. The talent shall collaborate with the advertiser to discuss and submit the script within 14 business days of receiving the product. Filming may only commence once the script is approved by the brand. A draft video must be submitted within 7 business days after script approved. The video may only be published once approved by the brand. ${revision}`);
+  items.push(`Post time: agreed upon by both parties`);
+  items.push(`The talent needs to display the brand logo, selling points, using feeling, and other requirements provided by Advertiser then call to action. (The advertiser will tell what the video needs to be shot, and the talent will self-edit the rest)`);
+  items.push(`The talent should provide the unlisted link to Advertiser before posting.`);
+  if(chk("needSpark")){
+    items.push(`The talent needs to provide AD ID (spark code) after the video post (${U.adPeriod}).`);
+  }
+  if(chk("bioOn")){
+    items.push(`${esc(brand)} brand's link in the bio for ${val("bioDays") || "7"} days, posting through the brand campaign's link if the brand needs.`);
+  }
+  items.push(`There should be no negative content in the promotion video(s)/post(s). After signing the contract with the brand, talent should not publish any brand-related behaviors or statements that are detrimental to the brand, once published, the talent will be held legally responsible and financially liable for any damage caused. Objective and truthful product reviews or good-faith opinions shall not constitute a breach of this clause; only proven malicious or false disparagement shall trigger liability.`);
+  items.push(`The brand has the right to unilaterally cancel the cooperation and not pay the cooperation fee if:<br><span style="margin-left:18px">* The video is released beyond the time specified by the brand</span><br><span style="margin-left:18px">* Talent has bad events, such as negative news, crime, etc., which affect the brand image</span><br><span style="margin-left:18px">* Not cooperating to produce the video as required</span>`);
+  items.push(`Unilateral Cancellation of Contracts<br><span style="margin-left:18px">Ensure the legitimate rights and interests of both parties. Unauthorized cancellation (including loss of contact) by any of the parties to the contract at the following points of cooperation requires compensation for losses to the other party.</span><br><span style="margin-left:18px">1. Received the product, but not yet shot: 50% of the contract amount.</span><br><span style="margin-left:18px">2. Draft video has been shot: 80% of the contract amount.</span><br><span style="margin-left:18px">In the event of any conflict between the preceding cancellation clause and this clause, this clause shall prevail.</span>`);
+  return items.map((t,i)=>`<p>${i+1}.&nbsp; ${t}</p>`).join("");
+}
+
+function buildApprovals(brand){
+  const isMolly = brand === "MollyJeweryUS";
+  const n = revCount();
+  let html = `
+<p>Advertiser shall have:</p>
+<p>. The right to approve the creative shooting ideas of the video;</p>
+<p>. The right to ask the talent to revise the rough cut of video(s) ${timesWord(n)} within Three (3) business days (otherwise such rough cut shall be deemed approved).</p>
+<p>. If the video content does not show the brand's selling point at all and does not meet the brand's filming requirements, the brand has the right to ask the talent to re-shoot the video.</p>
+<p>. If the collaboration is not completed and the video is not released on time because of influencer, the brand has the right not to pay any fees.</p>`;
+  if(isMolly) html += `<p>${esc(MOLLY_CLAUSE_BASE.replace("__N__", String(n)))}</p>`;
+  return html;
+}
+
+function buildAdditional(brand, U){
+  if(brand === "MollyJeweryUS"){
+    return `
+<p>Talent owns content, but is creating it for the brand, lending their name &amp; likeness. The Creator grants the Brand ${U.grant} authorization to use the Creator's Partnership Ads code for paid media amplification, and the Brand shall have full usage rights to all delivered assets across paid advertising, social media reposting, website, and organic marketing channels.</p>
+<p>All sponsored content will include the required disclosures, tags, and platform labels in accordance with applicable platform guidelines.</p>
+<p>Once the content is live, brand reserves the rights of using the content (post/video) produced by the partner on a global, non-exclusive basis ${U.forPeriod}. The Partner undertakes not to infringe the rights of any third party in the content produced, otherwise shall bear all losses caused to the brand as a result.</p>`;
+  }
+  return `
+<p>Talent owns content, but is creating it for the brand, lending their name &amp; likeness, but brand may only use on owned brand channels like social media, conversion ads etc.</p>
+<p>Once the review is live, brand reserves the rights of using the content of the review (post/video) produced by the partner on a global, non-exclusive basis ${U.forPeriod}. The Partner undertakes not to infringe the rights of any third party in the content produced, otherwise shall bear all losses caused to the brand as a result.</p>`;
+}
+
+/* =========================================================
+   手动覆盖（第 5 / 7 / 8 节）
+   ========================================================= */
+const AUTO = { "5":"", "7":"", "8":"" };
+
+function htmlToText(html){
+  const d = document.createElement("div");
+  d.innerHTML = String(html).replace(/<br\s*\/?>/gi, "\n").replace(/<\/p>/gi, "\n");
+  return d.textContent
+    .replace(/ /g, " ")
+    .split("\n").map(s => s.replace(/[ \t]+/g, " ").trim())
+    .filter(Boolean).join("\n");
+}
+function ovrActive(key){
+  const cb = document.getElementById("ovr" + key);
+  return !!(cb && cb.checked && val("ovrText" + key));
+}
+function applyOverride(key, autoHtml){
+  AUTO[key] = autoHtml;
+  const tag = document.getElementById("tag" + key);
+  if(ovrActive(key)){
+    if(tag) tag.textContent = "· 手动";
+    return val("ovrText" + key)
+      .split(/\r?\n/).map(l => l.trim()).filter(Boolean)
+      .map(l => `<p>${esc(l)}</p>`).join("");
+  }
+  if(tag) tag.textContent = "";
+  return autoHtml;
+}
+function reloadOvr(key){
+  document.getElementById("ovrText" + key).value = htmlToText(AUTO[key]);
+  document.getElementById("ovr" + key).checked = true;
+  render();
+}
+function clearOvr(key){
+  document.getElementById("ovr" + key).checked = false;
+  document.getElementById("ovrText" + key).value = "";
+  render();
+}
+
+/* =========================================================
+   渲染
+   ========================================================= */
+function render(){
+  const brand = val("brand") || "Blacklyte";
+  const isMolly = brand === "MollyJeweryUS";
+  const U = usageCfg();
+
+  document.getElementById("mollyOpts").style.display = isMolly ? "block" : "none";
+  document.getElementById("usageCustomWrap").style.display =
+    document.getElementById("usageMode").value === "custom" ? "block" : "none";
+  document.getElementById("tagDerived").textContent =
+    `· ${durPhrase()} / ${U.perpetual ? "永久" : U.adPeriod}`;
+
+  const handle = val("handle") || "________";
+  const fee = val("fee") || "___";
+  const curSym = CUR_SYMBOL[document.getElementById("currency").value] || "$";
+  const date = fmtDate(val("date"));
+  const tt = val("ttLink"), ig = val("igLink"), yt = val("ytLink");
+
+  // 第 2 节 Campaign：原样显示粘贴内容，只按换行拆条
+  const campaignRaw = val("campaign");
+  const campSegs = campaignRaw.split(/\r?\n+/).map(s => s.trim()).filter(Boolean);
+  const campaign = campSegs.length
+      ? (campSegs.length > 1
+          ? campSegs.map((t,i)=>`<p>${i+1}. ${esc(t)}</p>`).join("")
+          : `<p>${esc(campSegs[0])}</p>`)
+      : `<p>__________</p>`;
+
+  // 第 5 节链接（主平台排第一）
+  const linkMap = { TikTok: chk("useTT") && tt, Instagram: chk("useIG") && ig, YouTube: chk("useYT") && yt };
+  const main = mainPlatform();
+  const order = [main, ...platforms().filter(p => p !== main)];
+  let links = order.filter(p => linkMap[p]).map(p => `<p>${esc(linkMap[p])}</p>`).join("");
+  if(!links) links = "<p>__________</p>";
+
+  const noteHtml = esc(NOTE.replace(/Blacklyte/g, brand));
+
+  let sampleBanner = "", sampleClause = "";
+  if(isMolly){
+    const mode = document.getElementById("sampleMode").value;
+    sampleClause = `<p>${esc(MOLLY_SAMPLE[mode])}</p>`;
+    sampleBanner = mode === "gift"
+      ? `<p class="hl">Product sample: this sample is a GIFT — the talent does NOT need to return it after the collaboration.</p>`
+      : `<p class="hl">Product sample: this sample must be RETURNED after the collaboration; both the outbound and return shipping costs are borne by 4UPR.</p>`;
+  }
+
+  const sec5Auto =
+    `<p>Talent shall deliver the agreed deliverable(s) on</p>${links}` +
+    `<p style="margin-top:8px"><b>Promotional Requirement(s):</b></p>` +
+    buildPromo(brand, U);
+  const sec7Auto = buildApprovals(brand);
+  let sec8Auto = buildAdditional(brand, U) + `<p>${esc(NODELETE)}</p>`;
+  if(isMolly) sec8Auto += sampleClause;
+  sec8Auto += `<p>${esc(agencyClause(brand))}</p><p>${esc(LIQDAM)}</p><p>${esc(CONFID)}</p>`;
+
+  const sec5 = applyOverride("5", sec5Auto);
+  const sec7 = applyOverride("7", sec7Auto);
+  const sec8 = applyOverride("8", sec8Auto);
+
+  const affiliateLine = isMolly ? "" : "<p>10% of affiliate commissions are paid through affiliates.</p>";
+  const sched = val("paySchedule");
+  const schedLine = sched ? `<p>${esc(sched)}</p>` : "";
+  const feesLine = /4upr/i.test(sched) ? "" : `<p><span class="hl">${esc(PAYFEES)}</span></p>`;
+
+  const talentContact = `
+    <p><b>Full name: </b>${esc(val("fullname"))||"__________"}</p>
+    <p><b>Address (apt, house, street): </b>${esc(val("addr"))}</p>
+    <p><b>City: </b>${esc(val("city"))}</p>
+    <p><b>State: </b>${esc(val("state"))}</p>
+    <p><b>Country: </b>${esc(val("country"))}</p>
+    <p><b>Postal code or ZIP code (P.O. Box): </b>${esc(val("zip"))}</p>
+    <p><b>Phone number: </b>${esc(val("phone"))}</p>`;
+
+  const advSigner = esc(val("advSigner")) || "__________";
+  const advTitle = esc(val("advTitle")) || "Marketing Manager";
+  const talentSigner = esc(val("fullname")) || "__________";
+
+  document.getElementById("doc").innerHTML = `
+    <p class="title">${esc(brand)} &amp; ${esc(handle)}</p>
+    <p class="subtitle">ONLINE PRODUCTION AND PROMOTIONAL SERVICES AGREEMENT</p>
+    <p class="intro">This Online Production and Promotional Services Agreement (the "Agreement"), effective as of <b>${date}</b> (the "Effective Date") constitutes the entire agreement between <b>4UPR COMPANY limited</b> ("Advertiser") and <b>${esc(handle)}</b> ("Talent").</p>
+    <table class="k">
+      <tr><td class="lbl">1. Talent:</td><td>${esc(handle)}</td></tr>
+      <tr><td class="lbl">2. Campaign:</td><td class="campaign keyhl">${campaign}${sampleBanner}</td></tr>
+      <tr><td class="lbl">3. Talent Contact:</td><td>${talentContact}</td></tr>
+      <tr><td class="lbl">4. Advertiser Contact:</td><td>
+        <p><b>Name: </b>${ADV.name}</p><p><b>E-mail: </b>${esc(val("advEmail") || ADV.email)}</p>
+        <p><b>Phone number: </b>${ADV.phone}</p><p><b>Address: </b>${ADV.addr}</p></td></tr>
+      <tr><td class="lbl">5. Deliverables:</td><td class="pr">${sec5}</td></tr>
+      <tr><td class="lbl">6. Payment:</td><td class="pr">
+        <p><span class="hl">The fee for this collaboration is ${curSym}${esc(fee)}.</span></p>
+        <p>Payment Method: PayPal OR Bank Transfer.</p>
+        ${schedLine}
+        ${feesLine}
+        ${affiliateLine}</td></tr>
+      <tr><td class="lbl">7. Approvals:</td><td class="pr">${sec7}</td></tr>
+      <tr><td class="lbl">8. Additional Contract edits/add ons:</td><td class="pr">${sec8}</td></tr>
+    </table>
+    <p style="margin-top:12px">In witness whereof, the parties hereto have executed this Agreement as of the Effective Date: <b>${date}</b></p>
+    <table class="sig">
+      <tr>
+        <td>
+          <b>TALENT:</b><br><b>${esc(handle)}</b>
+          <div class="sp"></div>
+          By (sign):
+          <div class="signline"><span class="hint">Signature</span></div>
+          Print name: ${talentSigner}<br>
+          Its: Talent<br>
+          Date: ____________________
+        </td>
+        <td>
+          <b>ADVERTISER:</b><br><b>4UPR COMPANY limited</b>
+          <div class="sp"></div>
+          By (sign):
+          <div class="signline"><span class="autosign">${advSigner}</span></div>
+          Print name: ${advSigner}<br>
+          Its: ${advTitle}<br>
+          Date: ${date}
+        </td>
+      </tr>
+    </table>
+    <p style="font-size:10.5px; margin-top:8px">${esc(ESIGN)}</p>
+    <p class="note">${noteHtml}</p>`;
+}
+
+/* =========================================================
+   地址解析（原样保留）
+   ========================================================= */
+function setF(id,v){ if(v){ document.getElementById(id).value = v.replace(/\s+$/,'').trim(); } }
+
+const labelReG = /(e-?mail|full\s*name|first\s*name|last\s*name|pr[ée]nom|nom|name|address|adresse|street|city|ville|town|state|province|region|country|pays|zip\s*code|postal\s*code|post\s*code|zip|postal|phone\s*number|phone|mobile|tel(?:ephone)?)\s*[:：]/gi;
+function mapLabel(l){
+  l = (l||"").toLowerCase().replace(/\s+/g," ").trim();
+  if(/e-?mail/.test(l)) return "email";
+  if(/name|nom|pr[ée]nom/.test(l)) return "fullname";
+  if(/address|adresse|street/.test(l)) return "addr";
+  if(/city|ville|town/.test(l)) return "city";
+  if(/state|province|region/.test(l)) return "state";
+  if(/country|pays/.test(l)) return "country";
+  if(/zip|postal|post/.test(l)) return "zip";
+  if(/phone|mobile|tel/.test(l)) return "phone";
+  return "";
+}
+function parseAddress(raw){
+  const out = {fullname:'',addr:'',city:'',state:'',country:'',zip:'',phone:''};
+  const labelMap = [
+    [/^(full\s*name|name|nom|pr[ée]nom|姓名)\b/i,'fullname'],
+    [/^(address|addr|street|adresse|adres|地址)\b/i,'addr'],
+    [/^(city|town|ville|stad|城市)\b/i,'city'],
+    [/^(state|province|region|状态|州|省|地区)\b/i,'state'],
+    [/^(zip|postal|post\s*code|zip\s*code|postal\s*code|邮编|邮政编码)\b/i,'zip'],
+    [/^(country|pays|land|国家)\b/i,'country'],
+    [/^(phone|tel|telephone|mobile|电话|手机)\b/i,'phone'],
+  ];
+  let lines = raw.split(/\n/).map(l=>l.trim()).filter(Boolean);
+  const unlabeled = [];
+  for(let line of lines){
+    line = line.replace(/^\s*\d+\s*[\.\)]\s*/,'');
+    const inline = [...line.matchAll(labelReG)];
+    if(inline.length >= 2){
+      for(let i=0;i<inline.length;i++){
+        const key = mapLabel(inline[i][1]);
+        const s = inline[i].index + inline[i][0].length;
+        const e = (i+1<inline.length) ? inline[i+1].index : line.length;
+        const v = line.slice(s,e).trim().replace(/[;,]+$/,'').trim();
+        if(key && v && !out[key]) out[key] = v;
+      }
+      continue;
+    }
+    let matched = false;
+    for(const [re,key] of labelMap){
+      if(re.test(line)){
+        let v = line.split(/[:：]/).slice(1).join(':').trim();
+        if(!v) v = line.replace(re,'').replace(/^[:：\-\s\/]+/,'').trim();
+        if(v) out[key] = v;
+        matched = true; break;
+      }
+    }
+    if(!matched) unlabeled.push(line);
+  }
+  const countries = ['united kingdom','uk','united states','usa','us','france','netherlands','the netherlands','germany','spain','italy','canada','australia','belgium','ireland','portugal','poland','sweden','switzerland','austria','denmark','norway','finland','china','中国'];
+  for(let i=unlabeled.length-1;i>=0;i--){
+    if(/^\+?[\d][\d\s().\-]{6,}$/.test(unlabeled[i])){ if(!out.phone) out.phone=unlabeled[i]; unlabeled.splice(i,1); }
+  }
+  for(let i=unlabeled.length-1;i>=0;i--){
+    if(countries.includes(unlabeled[i].toLowerCase())){ if(!out.country) out.country=unlabeled[i]; unlabeled.splice(i,1); }
+  }
+  for(let i=unlabeled.length-1;i>=0;i--){
+    const l = unlabeled[i];
+    if(!out.zip && /\d/.test(l) && l.length<=10 && /^[A-Za-z0-9 \-]+$/.test(l) && !/\s\S+\s/.test(l)){
+      out.zip = l; unlabeled.splice(i,1);
+    }
+  }
+  const order = ['fullname','addr','city','state'];
+  let oi = 0;
+  for(const l of unlabeled){
+    while(oi<order.length && out[order[oi]]) oi++;
+    if(oi<order.length){ out[order[oi]] = l; oi++; }
+  }
+  return out;
+}
+function parsePaste(){
+  const raw = document.getElementById("addrPaste").value;
+  if(!raw.trim()) return;
+  const p = parseAddress(raw);
+  setF("fullname",p.fullname); setF("addr",p.addr); setF("city",p.city);
+  setF("state",p.state); setF("country",p.country); setF("zip",p.zip); setF("phone",p.phone);
+  const s = document.getElementById("addrStatus");
+  s.className = "astatus ok";
+  s.textContent = "✓ 已识别，请核对下方字段是否正确";
+  render();
+}
+function fullAddrString(){
+  return [val("addr"),val("city"),val("state"),val("zip"),val("country")].filter(Boolean).join(", ");
+}
+async function verifyAddr(){
+  const q = fullAddrString();
+  const s = document.getElementById("addrStatus");
+  if(!q){ s.className="astatus warn"; s.textContent="请先填入地址"; return; }
+  s.className="astatus busy"; s.textContent="校验中…（通过 OpenStreetMap）";
+  try{
+    const r = await fetch("https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&limit=1&q="+encodeURIComponent(q));
+    const j = await r.json();
+    if(j && j.length){
+      s.className="astatus ok";
+      s.innerHTML = "✓ 地址可在地图上定位：<br>"+esc(j[0].display_name)+
+        ' &nbsp;<a href="https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(q)+'" target="_blank">在谷歌地图查看</a>';
+    } else {
+      s.className="astatus warn";
+      s.innerHTML = "⚠ 未能在地图上找到该地址，请仔细核对，或点"+
+        '<a href="https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(q)+'" target="_blank">谷歌地图</a>人工确认。';
+    }
+  }catch(e){
+    s.className="astatus warn";
+    s.innerHTML = "校验服务暂不可用（可能离线或被限流）。请点"+
+      '<a href="https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(q)+'" target="_blank">谷歌地图</a>人工核对。';
+  }
+}
+
+function printPDF(){
+  const brand = val("brand") || "Contract";
+  const handle = val("handle") || "talent";
+  const prev = document.title;
+  document.title = `${brand} & ${handle}`.replace(/[\\/:*?"<>|]/g, "-");
+  window.print();
+  setTimeout(()=>{ document.title = prev; }, 1200);
+}
+
+/* =========================================================
+   事件绑定
+   ========================================================= */
+document.getElementById("payPreset").addEventListener("change", e=>{
+  document.getElementById("paySchedule").value = PAY_PRESETS[e.target.value] || "";
+  render();
+});
+
+document.getElementById("brand").addEventListener("change", ()=>{ render(); });
+
+document.getElementById("useTT").addEventListener("change", e=>{
+  document.getElementById("needSpark").checked = e.target.checked;
+});
+["useTT","useIG","useYT"].forEach(id=>{
+  document.getElementById(id).addEventListener("change", ()=>{ syncMainPlat(); render(); });
+});
+
+// 合作内容：粘贴即识别（和地址一样）
+const campEl = document.getElementById("campaign");
+campEl.addEventListener("paste", ()=> setTimeout(()=>parseCampaign(true), 30));
+campEl.addEventListener("blur", ()=> parseCampaign(false));
+
+["5","7","8"].forEach(k=>{
+  document.getElementById("ovr"+k).addEventListener("change", e=>{
+    const ta = document.getElementById("ovrText"+k);
+    if(e.target.checked && !ta.value.trim()) ta.value = htmlToText(AUTO[k]);
+    render();
+  });
+});
+
+document.querySelectorAll("input, select, textarea").forEach(el=>{
+  el.addEventListener("input", render);
+  el.addEventListener("change", render);
+});
+
+document.getElementById("addrPaste").addEventListener("paste", ()=> setTimeout(parsePaste, 30));
+document.getElementById("addrPaste").addEventListener("blur", ()=> parsePaste());
+
+// defaults
+document.getElementById("advSigner").value = "Bella";
+document.getElementById("payPreset").value = "5";
+document.getElementById("paySchedule").value = PAY_PRESETS["5"];
+document.getElementById("durMin").value = "45";
+syncMainPlat();
+render();
+</script>
+</body>
+</html>
