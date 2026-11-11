@@ -119,10 +119,10 @@
     <label>合作品牌</label>
     <select id="brand">
       <option value="Blacklyte">Blacklyte</option>
-      <option value="MollyJeweryUS">MollyJeweryUS</option>
+      <option value="MollyJewelryUS">MollyJewelryUS</option>
     </select>
     <div id="mollyOpts" style="display:none">
-      <label>样品处理（仅 MollyJeweryUS）</label>
+      <label>样品处理（仅 MollyJewelryUS）</label>
       <select id="sampleMode">
         <option value="return">借用，拍摄后退回（退回运费由品牌承担）</option>
         <option value="gift">赠送，网红自留</option>
@@ -453,7 +453,7 @@ function parseCampaign(force){
     if(bm) setV("bioDays", bm[1]);
     got.push(`Bio 挂链 <b>${val("bioDays") || 7} 天</b>`);
   } else {
-    const byBrand = val("brand") !== "MollyJeweryUS";
+    const byBrand = val("brand") !== "MollyJewelryUS";
     setC("bioOn", byBrand);
     missed.push(`Bio 挂链（按品牌默认：${byBrand ? "有，" + (val("bioDays") || 7) + " 天" : "无"}）`);
   }
@@ -517,7 +517,7 @@ const MOLLY_SAMPLE = {
 const NOTE = `*Note: We are a third-party media agency and cooperate with the Blacklyte brand. The talent signed a contract with our company "4UPR COMPANY limited" instead of the Blacklyte brand. All cooperation details should be communicated with "4UPR COMPANY limited". Please do not cross our company and contact Blacklyte official brand directly, otherwise it is a breach of contract.`;
 
 function buildPromo(brand, U){
-  const isMolly = brand === "MollyJeweryUS";
+  const isMolly = brand === "MollyJewelryUS";
   const n = revCount();
   const revision = isMolly
     ? `<span class="hl">If the talent does not film in accordance with the script approved by the brand, the brand shall have the right to request a re-shoot or revisions to the video (no more than ${n} round(s) of revisions).</span>`
@@ -542,7 +542,7 @@ function buildPromo(brand, U){
 }
 
 function buildApprovals(brand){
-  const isMolly = brand === "MollyJeweryUS";
+  const isMolly = brand === "MollyJewelryUS";
   const n = revCount();
   let html = `
 <p>Advertiser shall have:</p>
@@ -555,7 +555,7 @@ function buildApprovals(brand){
 }
 
 function buildAdditional(brand, U){
-  if(brand === "MollyJeweryUS"){
+  if(brand === "MollyJewelryUS"){
     return `
 <p>Talent owns content, but is creating it for the brand, lending their name &amp; likeness. The Creator grants the Brand ${U.grant} authorization to use the Creator's Partnership Ads code for paid media amplification, and the Brand shall have full usage rights to all delivered assets across paid advertising, social media reposting, website, and organic marketing channels.</p>
 <p>All sponsored content will include the required disclosures, tags, and platform labels in accordance with applicable platform guidelines.</p>
@@ -611,7 +611,7 @@ function clearOvr(key){
    ========================================================= */
 function render(){
   const brand = val("brand") || "Blacklyte";
-  const isMolly = brand === "MollyJeweryUS";
+  const isMolly = brand === "MollyJewelryUS";
   const U = usageCfg();
 
   document.getElementById("mollyOpts").style.display = isMolly ? "block" : "none";
